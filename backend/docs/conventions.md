@@ -64,6 +64,13 @@ files to "fix" them into compliance; add a new migration instead.
   (`requests_no_doctor_overlap`, `requests_time_order`) — the name should
   tell you what broke when the constraint violation error shows up in a log,
   without having to go look at the DDL.
+- **Append-only tables** (audit/history tables nobody should ever edit or
+  delete from, even at the RPC/owner level): attach the generic
+  `public.reject_update_or_delete()` trigger function
+  (`20261112000006_transactional_tables_strict_integrity.sql`) `BEFORE UPDATE
+  OR DELETE` rather than writing a new one-off trigger function per table —
+  it just raises with `errcode = '0A000'` unconditionally. Already used by
+  `request_status_history` and `audit_log`; reuse it for the next one too.
 - **Foreign key constraints**: left as Postgres's default
   `<table>_<column>_fkey` unless a table has more than one FK to the same
   target and the default names collide or confuse (rare; name explicitly
