@@ -17,23 +17,37 @@ tightening policies after a gap was found.
 
 ### Accepted exception: `security_invoker = false` views
 
-`public.doctors_public` and `public.doctor_services_public`
-(`20261112000005_doctor_tables_strict_integrity.sql`) are deliberately
-created `WITH (security_invoker = false)`. Supabase's advisor flags this as
-an **ERROR**-level finding ("Security Definer View") — correctly, since it
-means the view runs with its owner's privileges rather than the querying
-role's, bypassing `doctor_profiles`'s own RLS (which is admin-only). That's
-exactly why it's needed here: with `security_invoker = true` (the default),
-querying either view as `anon`/`authenticated` would apply
-`doctor_profiles`'s admin-only RLS *underneath* the view and return zero
-rows for everyone except admins, defeating the view's purpose. The view's
-own hand-picked column list (never `license_number`, `rejection_reason`,
-`reviewed_by`, `email`, or `phone`) and `WHERE status = 'approved' AND NOT
-is_suspended` clause are the *entire* safety boundary for these two views —
-not the underlying tables' RLS. Treat the advisor's ERROR here as
+`public.doctors_public`, `public.doctor_services_public`
+(`20261112000005_doctor_tables_strict_integrity.sql`), and
+`public.doctor_patient_contacts` (`20261112000007_rls_policies.sql`) are
+deliberately created `WITH (security_invoker = false)`. Supabase's advisor
+flags each as an **ERROR**-level finding ("Security Definer View") —
+correctly, since it means the view runs with its owner's privileges rather
+than the querying role's, bypassing the underlying table's own RLS
+(`doctor_profiles`'s is admin-only; `profiles`'s is own-row-only). That's
+exactly why it's needed in each case: with `security_invoker = true` (the
+default), querying any of them as `anon`/`authenticated` would apply the
+underlying RLS *underneath* the view and return zero rows for anyone it's
+actually meant for, defeating the view's purpose. Each view's own
+hand-picked column list (`doctors_public`/`doctor_services_public` never
+expose `license_number`, `rejection_reason`, `reviewed_by`, `email`, or
+`phone`; `doctor_patient_contacts` exposes only `patient_id` and
+`full_name`, never `phone`) and `WHERE` clause are the *entire* safety
+boundary — not the underlying tables' RLS. Treat the advisor's ERROR here as
 acknowledged-and-intentional, not unaddressed; any *new* `security_invoker =
 false` view must get the same scrutiny (safe column list hand-checked, a
 real filter in the `WHERE` clause) before being treated the same way.
+
+Contrast with `public.doctor_request_contacts` (also
+`20261112000007_rls_policies.sql`), which is `WITH (security_invoker =
+true)` on purpose: the doctor can already see their own assigned `requests`
+rows in full via the existing `requests_select_participant_or_admin`
+policy, so this view doesn't need to bypass anything — it only adds a
+`CASE` expression masking `contact_phone` to `NULL` unless the request is
+`accepted`/`confirmed`, something a plain column grant can't express.
+Picking invoker vs. definer rights per view, deliberately, based on whether
+the underlying RLS already does what's needed, is the right default
+question to ask before reaching for `security_invoker = false`.
 
 A table with RLS enabled and *zero* policies denies all access by default —
 that is the safe failure mode. If a table ever needs to be fully public-read
