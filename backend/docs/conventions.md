@@ -28,6 +28,15 @@ files to "fix" them into compliance; add a new migration instead.
     'Asia/Kolkata'` in a reporting query), never baked into stored data.
     Don't add a timezone column "just in case" until a real multi-timezone
     requirement shows up.
+- **"Array is not empty" checks**: use `cardinality(col) > 0`, never
+  `array_length(col, 1) > 0`. `array_length()` returns `NULL` — not `0` — for
+  a zero-length array (there is no "dimension 1" to report), and a `CHECK`
+  constraint treats a `NULL` result as satisfied, so the array_length form
+  silently lets an empty array through. Caught live while writing the pgTAP
+  test for `services_supported_modes_not_empty`
+  (`20261112000004_service_catalog_hardening.sql`): the test inserted `'{}'`
+  expecting a rejection and got none, until the constraint was rewritten
+  with `cardinality()`.
 - **Case-insensitive text** (email, etc.): use the `citext` type
   (`extensions.citext` if `extensions` isn't on your `search_path` — check
   with `show search_path;` before assuming a bare `citext` resolves) instead
