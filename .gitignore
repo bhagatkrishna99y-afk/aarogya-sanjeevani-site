@@ -1,0 +1,24 @@
+# Node / web
+node_modules/
+dist/
+build/
+.vite/
+*.local
+.env
+.env.*
+!.env.example
+
+# Android
+*.iml
+.gradle/
+local.properties
+.idea/
+*.apk
+*.aab
+.cxx/
+captures/
+apps/**/build/
+
+# OS
+.DS_Store
+Thumbs.db
