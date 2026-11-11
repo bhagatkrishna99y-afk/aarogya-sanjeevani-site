@@ -355,6 +355,11 @@ begin
 
   v_day_of_week := extract(dow from p_date);
 
+  -- doctor_weekly_availability.start_time/end_time have no timezone column,
+  -- so wall-clock times are treated as UTC. `date + time` yields a plain
+  -- timestamp; it must be converted to timestamptz via `at time zone` before
+  -- comparing against now() or matching the function's timestamptz return
+  -- type, or Postgres rejects the query with a type mismatch.
   return query
   with windows as (
     select start_time, end_time, slot_duration_minutes
@@ -364,7 +369,7 @@ begin
   candidates as (
     select
       w.end_time as window_end,
-      (p_date + w.start_time) + (make_interval(mins => n * w.slot_duration_minutes)) as candidate_start
+      (p_date + w.start_time) + (make_interval(mins => n * w.slot_duration_minutes)) as candidate_start_local
     from windows w,
       lateral generate_series(0, greatest(
         0,
@@ -372,17 +377,21 @@ begin
       )) as n
   )
   select
-    c.candidate_start as slot_start,
-    c.candidate_start + make_interval(mins => v_duration_minutes) as slot_end
+    (c.candidate_start_local at time zone 'UTC') as slot_start,
+    (c.candidate_start_local at time zone 'UTC') + make_interval(mins => v_duration_minutes) as slot_end
   from candidates c
-  where c.candidate_start > now()
-    and (c.candidate_start::time + make_interval(mins => v_duration_minutes)) <= c.window_end
+  where (c.candidate_start_local at time zone 'UTC') > now()
+    and (c.candidate_start_local::time + make_interval(mins => v_duration_minutes)) <= c.window_end
     and not exists (
       select 1 from public.requests r
       where r.doctor_id = p_doctor_id
         and r.status in ('requested', 'accepted', 'confirmed')
         and tstzrange(r.scheduled_start, r.scheduled_end, '[)')
-            && tstzrange(c.candidate_start, c.candidate_start + make_interval(mins => v_duration_minutes), '[)')
+            && tstzrange(
+                 (c.candidate_start_local at time zone 'UTC'),
+                 (c.candidate_start_local at time zone 'UTC') + make_interval(mins => v_duration_minutes),
+                 '[)'
+               )
     )
   order by slot_start;
 end;
@@ -484,7 +493,7 @@ begin
   end if;
 
   update public.requests
-  set status = case when p_accept then 'accepted' else 'rejected' end,
+  set status = (case when p_accept then 'accepted' else 'rejected' end)::public.request_status,
       doctor_response_note = p_reason
   where id = p_request_id
   returning * into v_result;

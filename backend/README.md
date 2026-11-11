@@ -35,6 +35,13 @@ supabase start             # spins up local Postgres + Auth + Studio
 supabase db reset          # applies migrations + seed.sql from scratch
 ```
 
+## Recommended manual hardening
+
+Supabase's security advisor flags **leaked password protection** as disabled
+by default. Enable it from the dashboard: Authentication → Policies →
+Password Security → "Check against HaveIBeenPwned.org". This can't be set
+via SQL/migration, only from the dashboard or Management API.
+
 ## Bootstrapping the first admin
 
 No RPC can grant the `admin` role to prevent self-elevation. After the first
