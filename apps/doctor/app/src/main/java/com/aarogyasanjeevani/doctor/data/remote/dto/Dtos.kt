@@ -85,7 +85,15 @@ data class RequestDto(
     @SerialName("updated_at") val updatedAt: String,
 )
 
-/** [RequestDto] with the patient's name and the service name embedded via a PostgREST resource join. */
+/**
+ * [RequestDto] with the service name embedded via a PostgREST resource join.
+ * The patient's name and phone are NOT embedded here: `profiles` RLS only
+ * allows a user to select their own row, so a doctor embedding
+ * `profiles!requests_patient_id_fkey` would get `null` back for every
+ * request. Instead, fetch [DoctorPatientContactDto] (name) and
+ * [DoctorRequestContactDto] (status-masked phone) separately from their own
+ * narrow views and join them client-side -- see RequestsRepository.
+ */
 @Serializable
 data class RequestWithDetailsDto(
     val id: String,
@@ -100,16 +108,23 @@ data class RequestWithDetailsDto(
     @SerialName("created_at") val createdAt: String,
     @SerialName("updated_at") val updatedAt: String,
     val service: ServiceNameDto? = null,
-    val patient: PatientInfoDto? = null,
 )
 
 @Serializable
 data class ServiceNameDto(val name: String)
 
+/** Row of `public.doctor_patient_contacts` -- id + full_name only, never email/phone. */
 @Serializable
-data class PatientInfoDto(
+data class DoctorPatientContactDto(
+    @SerialName("patient_id") val patientId: String,
     @SerialName("full_name") val fullName: String,
-    val phone: String? = null,
+)
+
+/** Row of `public.doctor_request_contacts` -- contact_phone is already NULL server-side unless the request is accepted/confirmed. */
+@Serializable
+data class DoctorRequestContactDto(
+    @SerialName("request_id") val requestId: String,
+    @SerialName("contact_phone") val contactPhone: String? = null,
 )
 
 @Serializable
