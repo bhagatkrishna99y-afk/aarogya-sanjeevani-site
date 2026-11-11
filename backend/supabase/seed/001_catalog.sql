@@ -1,5 +1,5 @@
 -- Sample catalog data for local development and testing.
--- Safe to re-run: uses ON CONFLICT on the unique category name.
+-- Idempotent: safe to re-run (ON CONFLICT / NOT EXISTS guards below).
 
 insert into public.service_categories (name, description, icon, sort_order)
 values
