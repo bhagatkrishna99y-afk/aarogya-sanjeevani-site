@@ -12,9 +12,13 @@ notice; the code itself will not change once shipped.
 
 Codes AS000-AS014 are raised by `get_doctor_open_slots()` and
 `create_service_request()`, added in
-`20261112000008_scheduling_business_logic.sql`. Codes AS015 onward are
+`20261112000008_scheduling_business_logic.sql`. Codes AS015-AS021 are
 raised by `transition_request_status()` and friends, added in
-`20261112000009_request_status_state_machine.sql`.
+`20261112000009_request_status_state_machine.sql`. Codes AS022 onward are
+raised by the doctor-lifecycle and admin RPCs added in
+`20261112000010_doctor_profile_management.sql` and
+`20261112000011_admin_management.sql` -- see `docs/rpc-reference.md` for
+the full per-function reference (caller roles, side effects, decisions).
 
 **Note on numbering:** `20261112000009`'s own prompt asked for
 `AS002_SLOT_ALREADY_BOOKED` and `AS003_INVALID_TRANSITION` verbatim, but
@@ -50,6 +54,18 @@ scheme was actually intended.
 | `AS019_SLOT_ALREADY_BOOKED` | `transition_request_status` | Accepting a request would overlap an already-`accepted`/`confirmed` request for the same doctor (caught from `requests_no_doctor_overlap`'s `exclusion_violation`); the request stays `requested`. |
 | `AS020_TOO_EARLY_TO_COMPLETE` | `transition_request_status` | `confirmed -> completed` was attempted before `requests.scheduled_start`. |
 | `AS021_CANCELLATION_NOTICE_WINDOW` | `transition_request_status` | A patient tried to cancel inside the minimum notice window (`booking_settings().cancellation_notice_minutes`). Does not fire at the default setting of `0` (no restriction). |
+| `AS022_NOT_A_DOCTOR_ACCOUNT` | `submit_doctor_profile` | The caller's `profiles.role` is not `doctor`. |
+| `AS023_INVALID_DOCTOR_PROFILE_FIELDS` | `submit_doctor_profile` | Specialization/license number missing, years outside 0-70, no consultation modes chosen, or slot duration not one of 10/15/20/30/45/60. |
+| `AS024_ONLY_APPROVED_DOCTORS` | `set_doctor_availability`, `set_accepting_requests` | The caller's `doctor_profiles.status` is not `approved` (includes pending, rejected, and suspended). |
+| `AS025_INVALID_AVAILABILITY_WINDOW` | `set_doctor_availability` | A window has a bad day of week, a non-increasing start/end time, a slot duration outside 10/15/20/30/45/60, or is shorter than its own slot duration. |
+| `AS026_AVAILABILITY_OVERLAP` | `set_doctor_availability` | Two windows on the same day overlap -- caught either within the submitted batch itself (friendly, pre-insert) or, as a fallback, from the `doctor_weekly_availability_no_overlap` EXCLUDE constraint. |
+| `AS027_NOT_AUTHORIZED` | Every `admin_*` function | The caller is not `is_admin()`. |
+| `AS028_DOCTOR_NOT_FOUND` | `admin_set_doctor_status` | `p_doctor_id` has no `doctor_profiles` row. |
+| `AS029_INVALID_DOCTOR_STATUS_TRANSITION` | `admin_set_doctor_status`, `admin_set_user_role` | For `admin_set_doctor_status`: the `(old_status, new_status)` pair isn't one of `pending->approved`, `pending->rejected`, `approved->suspended`, `suspended->approved` (note `rejected->approved` is deliberately not in this list -- see `docs/rpc-reference.md`), or `rejected` was requested with no reason. For `admin_set_user_role`: the target already has the requested role. |
+| `AS030_USER_NOT_FOUND` | `admin_set_user_role`, `admin_set_user_suspended` | `p_user_id` has no `profiles` row. |
+| `AS031_CANNOT_DEMOTE_LAST_ADMIN` | `admin_set_user_role` | The target is the only remaining `admin`-role account. |
+| `AS032_INVALID_CATALOG_FIELDS` | `admin_upsert_service_category`, `admin_upsert_service` | Missing name, missing/invalid category, no supported modes, or a CHECK/UNIQUE constraint violation on the underlying table. |
+| `AS033_CATALOG_ENTITY_NOT_FOUND` | `admin_upsert_service_category`, `admin_set_category_active`, `admin_upsert_service`, `admin_set_service_active` | `p_id`/`p_category_id`/`p_service_id` does not match an existing row. |
 
 ## Why `get_doctor_open_slots` doesn't raise `AS002`
 
