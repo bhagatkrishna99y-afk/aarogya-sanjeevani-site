@@ -14,11 +14,13 @@ Codes AS000-AS014 are raised by `get_doctor_open_slots()` and
 `create_service_request()`, added in
 `20261112000008_scheduling_business_logic.sql`. Codes AS015-AS021 are
 raised by `transition_request_status()` and friends, added in
-`20261112000009_request_status_state_machine.sql`. Codes AS022 onward are
+`20261112000009_request_status_state_machine.sql`. Codes AS022-AS033 are
 raised by the doctor-lifecycle and admin RPCs added in
 `20261112000010_doctor_profile_management.sql` and
 `20261112000011_admin_management.sql` -- see `docs/rpc-reference.md` for
 the full per-function reference (caller roles, side effects, decisions).
+Codes AS034-AS035 are the rate limits added to `create_service_request`
+in `20261112000013_rate_limiting.sql` -- see `docs/performance.md`.
 
 **Note on numbering:** `20261112000009`'s own prompt asked for
 `AS002_SLOT_ALREADY_BOOKED` and `AS003_INVALID_TRANSITION` verbatim, but
@@ -66,6 +68,8 @@ scheme was actually intended.
 | `AS031_CANNOT_DEMOTE_LAST_ADMIN` | `admin_set_user_role` | The target is the only remaining `admin`-role account. |
 | `AS032_INVALID_CATALOG_FIELDS` | `admin_upsert_service_category`, `admin_upsert_service` | Missing name, missing/invalid category, no supported modes, or a CHECK/UNIQUE constraint violation on the underlying table. |
 | `AS033_CATALOG_ENTITY_NOT_FOUND` | `admin_upsert_service_category`, `admin_set_category_active`, `admin_upsert_service`, `admin_set_service_active` | `p_id`/`p_category_id`/`p_service_id` does not match an existing row. |
+| `AS034_TOO_MANY_ACTIVE_REQUESTS` | `create_service_request` | The patient already has 10 requests in `requested`/`accepted`/`confirmed` status. See `docs/performance.md`'s "Rate limiting" section for the design notes behind this and the next code. |
+| `AS035_RATE_LIMITED` | `create_service_request` | The patient has already created 5 requests in the trailing 60 minutes. |
 
 ## Why `get_doctor_open_slots` doesn't raise `AS002`
 
