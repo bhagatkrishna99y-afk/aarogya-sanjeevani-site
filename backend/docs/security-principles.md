@@ -51,6 +51,29 @@ alter default privileges in schema public revoke execute on functions from anon,
 fails loudly (permission denied) instead of silently succeeding for a role
 that should never have had access.
 
+That fix turned out to be incomplete in a way that bit again almost
+immediately: it only revoked the default for `anon, authenticated`, not for
+the separate `PUBLIC` pseudo-role that Postgres grants `EXECUTE` to on
+*every* `CREATE FUNCTION` unless told otherwise. `prevent_role_escalation()`
+(added in `20261112000002_core_enums_and_profiles.sql`, after the fix above)
+silently inherited that implicit `PUBLIC` grant and was callable directly
+via `/rest/v1/rpc/prevent_role_escalation` by anyone signed in or not — a
+trigger-only function that should never be invokable directly. Caught by
+running the advisor immediately after creating it, not by review.
+`20261112000003_fix_prevent_role_escalation_public_grant.sql` fixes that one
+function and closes the systemic gap:
+
+```sql
+alter default privileges in schema public revoke execute on functions from public;
+```
+
+The lesson generalizes: "revoke the default" is only as complete as the list
+of grantees you remembered to name. When Postgres has more than one implicit
+default in play (`PUBLIC` here is separate from, and broader than, `anon`/
+`authenticated`), check `pg_proc.proacl` directly after creating a new
+function — don't assume a grant statement you wrote is the only grant that
+exists.
+
 The same discipline applies to table grants: `revoke all on all tables in
 schema public from anon, authenticated;` first, then grant column- or
 row-scoped access back per table based on what that role actually needs —
