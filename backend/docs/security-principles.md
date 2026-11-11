@@ -15,6 +15,26 @@ level security;` with explicit policies — never a table left world-readable
 `20261111120014_fix_doctor_own_admin_notes_leak.sql` for examples of
 tightening policies after a gap was found.
 
+### Accepted exception: `security_invoker = false` views
+
+`public.doctors_public` and `public.doctor_services_public`
+(`20261112000005_doctor_tables_strict_integrity.sql`) are deliberately
+created `WITH (security_invoker = false)`. Supabase's advisor flags this as
+an **ERROR**-level finding ("Security Definer View") — correctly, since it
+means the view runs with its owner's privileges rather than the querying
+role's, bypassing `doctor_profiles`'s own RLS (which is admin-only). That's
+exactly why it's needed here: with `security_invoker = true` (the default),
+querying either view as `anon`/`authenticated` would apply
+`doctor_profiles`'s admin-only RLS *underneath* the view and return zero
+rows for everyone except admins, defeating the view's purpose. The view's
+own hand-picked column list (never `license_number`, `rejection_reason`,
+`reviewed_by`, `email`, or `phone`) and `WHERE status = 'approved' AND NOT
+is_suspended` clause are the *entire* safety boundary for these two views —
+not the underlying tables' RLS. Treat the advisor's ERROR here as
+acknowledged-and-intentional, not unaddressed; any *new* `security_invoker =
+false` view must get the same scrutiny (safe column list hand-checked, a
+real filter in the `WHERE` clause) before being treated the same way.
+
 A table with RLS enabled and *zero* policies denies all access by default —
 that is the safe failure mode. If a table ever needs to be fully public-read
 (e.g. the service catalog), say so with an explicit `using (true)` or
