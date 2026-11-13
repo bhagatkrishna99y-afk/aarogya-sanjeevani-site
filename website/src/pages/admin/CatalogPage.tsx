@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import type { Tables } from "../../lib/database.types";
 import { EmptyState, ErrorState, LoadingState, FRIENDLY_ERROR } from "../../components/StatusViews";
+import { Seo } from "@/components/seo/Seo";
 
 type Category = Tables<"service_categories">;
 type Service = Tables<"services">;
@@ -39,6 +40,7 @@ export function CatalogPage() {
 
   return (
     <div className="space-y-10">
+      <Seo title="Catalog" />
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Catalog</h1>
         <p className="mt-1 text-sm text-slate-600">
@@ -47,12 +49,22 @@ export function CatalogPage() {
       </div>
 
       <CategoriesSection categories={categories} onChange={() => setReloadKey((k) => k + 1)} />
-      <ServicesSection categories={categories} services={services} onChange={() => setReloadKey((k) => k + 1)} />
+      <ServicesSection
+        categories={categories}
+        services={services}
+        onChange={() => setReloadKey((k) => k + 1)}
+      />
     </div>
   );
 }
 
-function CategoriesSection({ categories, onChange }: { categories: Category[]; onChange: () => void }) {
+function CategoriesSection({
+  categories,
+  onChange,
+}: {
+  categories: Category[];
+  onChange: () => void;
+}) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -81,7 +93,10 @@ function CategoriesSection({ categories, onChange }: { categories: Category[]; o
   }
 
   async function toggleActive(category: Category) {
-    await supabase.from("service_categories").update({ is_active: !category.is_active }).eq("id", category.id);
+    await supabase
+      .from("service_categories")
+      .update({ is_active: !category.is_active })
+      .eq("id", category.id);
     onChange();
   }
 
@@ -97,12 +112,16 @@ function CategoriesSection({ categories, onChange }: { categories: Category[]; o
             <li key={category.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <div>
                 <p className="font-medium text-slate-900">{category.name}</p>
-                {category.description && <p className="text-sm text-slate-500">{category.description}</p>}
+                {category.description && (
+                  <p className="text-sm text-slate-500">{category.description}</p>
+                )}
               </div>
               <button
                 onClick={() => toggleActive(category)}
                 className={`min-h-[48px] shrink-0 rounded-md px-3 text-sm font-medium ${
-                  category.is_active ? "text-slate-600 hover:bg-slate-100" : "text-brand-700 hover:bg-brand-50"
+                  category.is_active
+                    ? "text-slate-600 hover:bg-slate-100"
+                    : "text-brand-700 hover:bg-brand-50"
                 }`}
               >
                 {category.is_active ? "Deactivate" : "Activate"}
@@ -139,7 +158,7 @@ function CategoriesSection({ categories, onChange }: { categories: Category[]; o
         <button
           type="submit"
           disabled={submitting}
-          className="min-h-[48px] rounded-md bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+          className="min-h-[48px] rounded-md bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-800 disabled:opacity-60"
         >
           Add category
         </button>
@@ -215,7 +234,9 @@ function ServicesSection({
                 <button
                   onClick={() => toggleActive(service)}
                   className={`min-h-[48px] shrink-0 rounded-md px-3 text-sm font-medium ${
-                    service.is_active ? "text-slate-600 hover:bg-slate-100" : "text-brand-700 hover:bg-brand-50"
+                    service.is_active
+                      ? "text-slate-600 hover:bg-slate-100"
+                      : "text-brand-700 hover:bg-brand-50"
                   }`}
                 >
                   {service.is_active ? "Deactivate" : "Activate"}
@@ -285,7 +306,7 @@ function ServicesSection({
           <button
             type="submit"
             disabled={submitting}
-            className="min-h-[48px] rounded-md bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+            className="min-h-[48px] rounded-md bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-800 disabled:opacity-60"
           >
             Add service
           </button>

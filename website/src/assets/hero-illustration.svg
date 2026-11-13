@@ -1,0 +1,46 @@
+<svg viewBox="0 0 480 420" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    Original, hand-authored abstract artwork for the homepage hero:
+    a rounded "shield" (trust/safety), a heartbeat line (health), and a
+    small cross badge (care), tied together with a few connecting dots
+    (patients and doctors linking up). Not a reproduction of any stock
+    icon set, logo, or copyrighted character; every shape here is
+    original, plain geometry drawn for this project.
+  -->
+  <rect x="0" y="40" width="480" height="340" rx="32" fill="#f0fdfa" />
+
+  <circle cx="70" cy="90" r="10" fill="#fdba74" />
+  <circle cx="130" cy="70" r="6" fill="#fdba74" opacity="0.7" />
+  <circle cx="410" cy="100" r="10" fill="#5eead4" />
+  <circle cx="360" cy="75" r="6" fill="#5eead4" opacity="0.7" />
+  <path
+    d="M90 95 C 160 60, 320 60, 395 100"
+    stroke="#99f6e4"
+    stroke-width="3"
+    stroke-dasharray="2 10"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <path
+    d="M240 70 L 340 105 V 215 C 340 285 295 335 240 355 C 185 335 140 285 140 215 V 105 Z"
+    fill="#0f766e"
+  />
+  <path
+    d="M240 90 L 322 120 V 214 C 322 273 284 316 240 334 C 196 316 158 273 158 214 V 120 Z"
+    fill="#115e59"
+  />
+
+  <path
+    d="M168 220 H205 L218 190 L236 250 L252 210 L264 220 H312"
+    stroke="#ffffff"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+
+  <circle cx="335" cy="150" r="34" fill="#c2410c" />
+  <rect x="329" y="134" width="12" height="32" rx="3" fill="#ffffff" />
+  <rect x="319" y="144" width="32" height="12" rx="3" fill="#ffffff" />
+</svg>

@@ -2,10 +2,63 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f766e" />
+
+    <!--
+      All generated from the real logo (src/assets/logo.png), a raster
+      image -- there's no SVG rendition to link directly, so every size
+      here is a PNG. Regenerate all of them with `npm run generate:icons`
+      if src/assets/logo.png ever changes -- see scripts/generate-icons.mjs.
+    -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
     <title>Aarogya Sanjeevani</title>
-    <meta name="description" content="Connecting patients with approved doctors." />
+    <meta
+      name="description"
+      content="Aarogya Sanjeevani connects you with approved doctors for consultations and services -- discover, book and track your care requests from one place."
+    />
+
+    <!--
+      Baseline Open Graph / Twitter Card tags -- these are the ones that
+      matter most *here*, in the static HTML, rather than in the `Seo`
+      component that renders them per-page via React: Googlebot executes
+      JavaScript before indexing, so it sees the Seo component's per-page
+      values fine, but most social link-preview bots (Facebook's,
+      Twitter/X's, Slack's, WhatsApp's) do not run JavaScript at all and
+      only ever read this static document -- for every route on this
+      single-page app, since they don't navigate it as a browser would.
+      These tags are the real fallback those crawlers see; the Seo
+      component's per-page overrides are a bonus for the crawlers (and
+      users' browser tabs) that do execute JS. This is a known, accepted
+      limitation of an SPA with no server-side rendering: a page-specific
+      social preview would need SSR/prerendering to work for non-JS
+      crawlers, which is out of scope here.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Aarogya Sanjeevani" />
+    <meta property="og:title" content="Aarogya Sanjeevani" />
+    <meta
+      property="og:description"
+      content="Aarogya Sanjeevani connects you with approved doctors for consultations and services -- discover, book and track your care requests from one place."
+    />
+    <!-- %VITE_SITE_URL% is replaced at build time from .env by Vite's
+         built-in HTML env interpolation -- og:image/twitter:image must
+         be absolute URLs per spec, a relative path isn't reliably
+         resolved by every crawler. -->
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Aarogya Sanjeevani" />
+    <meta
+      name="twitter:description"
+      content="Aarogya Sanjeevani connects you with approved doctors for consultations and services -- discover, book and track your care requests from one place."
+    />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
   </head>
   <body>
     <div id="root"></div>

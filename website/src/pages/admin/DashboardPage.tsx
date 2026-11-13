@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { ErrorState, LoadingState, FRIENDLY_ERROR } from "../../components/StatusViews";
+import { Seo } from "@/components/seo/Seo";
 
 interface Stats {
   pendingDoctors: number;
@@ -22,8 +23,14 @@ export function DashboardPage() {
 
     (async () => {
       const [pending, approved, open, services] = await Promise.all([
-        supabase.from("doctor_profiles").select("*", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("doctor_profiles").select("*", { count: "exact", head: true }).eq("status", "approved"),
+        supabase
+          .from("doctor_profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending"),
+        supabase
+          .from("doctor_profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "approved"),
         supabase
           .from("requests")
           .select("*", { count: "exact", head: true })
@@ -53,9 +60,14 @@ export function DashboardPage() {
 
   return (
     <div>
+      <Seo title="Dashboard" />
       <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
 
-      {error && <div className="mt-6"><ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} /></div>}
+      {error && (
+        <div className="mt-6">
+          <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />
+        </div>
+      )}
       {!error && !stats && <LoadingState label="Loading dashboard…" />}
       {!error && stats && (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -65,7 +77,11 @@ export function DashboardPage() {
             href="/admin/doctors?status=pending"
             highlight={stats.pendingDoctors > 0}
           />
-          <StatCard label="Approved doctors" value={stats.approvedDoctors} href="/admin/doctors?status=approved" />
+          <StatCard
+            label="Approved doctors"
+            value={stats.approvedDoctors}
+            href="/admin/doctors?status=approved"
+          />
           <StatCard label="Open requests" value={stats.openRequests} href="/admin/requests" />
           <StatCard label="Active services" value={stats.servicesCount} href="/admin/catalog" />
         </div>

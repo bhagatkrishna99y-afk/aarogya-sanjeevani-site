@@ -13,8 +13,8 @@ export function RequireAdmin() {
       <div className="flex min-h-screen flex-col items-center justify-center gap-2 px-4 text-center">
         <h1 className="text-xl font-semibold text-slate-900">Access restricted</h1>
         <p className="max-w-sm text-sm text-slate-600">
-          This account does not have admin access. If you believe this is a mistake, contact
-          another administrator.
+          This account does not have admin access. If you believe this is a mistake, contact another
+          administrator.
         </p>
       </div>
     );

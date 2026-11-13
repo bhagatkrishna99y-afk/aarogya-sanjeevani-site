@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import type { Enums, Tables } from "../../lib/database.types";
 import { EmptyState, ErrorState, LoadingState, FRIENDLY_ERROR } from "../../components/StatusViews";
+import { Seo } from "@/components/seo/Seo";
 
 type Role = Enums<"user_role">;
 type Profile = Tables<"profiles">;
@@ -25,7 +26,11 @@ export function UsersPage() {
     setUsers(null);
     setError(null);
 
-    let query = supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(200);
+    let query = supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200);
     if (filter !== "all") query = query.eq("role", filter);
 
     query.then(({ data, error: fetchError }) => {
@@ -44,6 +49,7 @@ export function UsersPage() {
 
   return (
     <div>
+      <Seo title="Users" />
       <h1 className="text-2xl font-bold text-slate-900">Users</h1>
       <p className="mt-1 max-w-xl text-sm text-slate-600">
         Roles can only change here or via doctor approval — never by users themselves. Granting
@@ -57,7 +63,7 @@ export function UsersPage() {
             key={f.value}
             onClick={() => setFilter(f.value)}
             className={`min-h-[48px] rounded-md px-3 text-sm font-medium ${
-              filter === f.value ? "bg-brand-600 text-white" : "text-slate-600 hover:bg-slate-100"
+              filter === f.value ? "bg-brand-700 text-white" : "text-slate-600 hover:bg-slate-100"
             }`}
           >
             {f.label}
@@ -72,11 +78,15 @@ export function UsersPage() {
         {!error && users !== null && users.length > 0 && (
           <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
             {users.map((user) => (
-              <li key={user.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <li
+                key={user.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+              >
                 <div>
                   <p className="font-medium text-slate-900">{user.full_name}</p>
                   <p className="text-xs text-slate-500">
-                    {user.phone ?? "No phone on file"} · joined {new Date(user.created_at).toLocaleDateString()}
+                    {user.phone ?? "No phone on file"} · joined{" "}
+                    {new Date(user.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -134,7 +144,9 @@ function PromoteButton({
     if (confirmText.trim() !== user.full_name) return;
     onStart();
     setError(null);
-    const { error: rpcError } = await supabase.rpc("admin_assign_admin_role", { p_user_id: user.id });
+    const { error: rpcError } = await supabase.rpc("admin_assign_admin_role", {
+      p_user_id: user.id,
+    });
     if (rpcError) {
       setError(rpcError.message || "Couldn't grant admin access.");
       onPromoted();

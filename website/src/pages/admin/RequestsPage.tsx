@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import type { Enums, Tables } from "../../lib/database.types";
 import { EmptyState, ErrorState, LoadingState, FRIENDLY_ERROR } from "../../components/StatusViews";
+import { Seo } from "@/components/seo/Seo";
 
 type RequestStatus = Enums<"request_status">;
 type HistoryRow = Tables<"request_status_history">;
@@ -85,6 +86,7 @@ export function RequestsPage() {
 
   return (
     <div>
+      <Seo title="Requests" />
       <h1 className="text-2xl font-bold text-slate-900">Requests</h1>
 
       <div className="mt-4 flex flex-wrap gap-1">
@@ -93,7 +95,7 @@ export function RequestsPage() {
             key={f.value}
             onClick={() => setFilter(f.value)}
             className={`min-h-[48px] rounded-md px-3 text-sm font-medium ${
-              filter === f.value ? "bg-brand-600 text-white" : "text-slate-600 hover:bg-slate-100"
+              filter === f.value ? "bg-brand-700 text-white" : "text-slate-600 hover:bg-slate-100"
             }`}
           >
             {f.label}
@@ -104,7 +106,9 @@ export function RequestsPage() {
       <div className="mt-6">
         {error && <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />}
         {!error && requests === null && <LoadingState label="Loading requests…" />}
-        {!error && requests !== null && requests.length === 0 && <EmptyState title="No requests found" />}
+        {!error && requests !== null && requests.length === 0 && (
+          <EmptyState title="No requests found" />
+        )}
         {!error && requests !== null && requests.length > 0 && (
           <ul className="space-y-3">
             {requests.map((request) => (
@@ -122,18 +126,20 @@ export function RequestsPage() {
                       Patient: {request.patient?.full_name ?? "—"}
                       {request.doctor?.full_name && ` · Doctor: ${request.doctor.full_name}`}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-500">
                       {new Date(request.scheduled_start).toLocaleString()}
                     </p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_STYLES[request.status]}`}>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_STYLES[request.status]}`}
+                  >
                     {request.status}
                   </span>
                 </button>
 
                 {expandedId === request.id && (
                   <div className="border-t border-slate-100 px-4 py-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                       Status history
                     </p>
                     {!history[request.id] ? (
@@ -146,10 +152,12 @@ export function RequestsPage() {
                           <li key={entry.id}>
                             {entry.old_status ? `${entry.old_status} → ` : "Created as "}
                             <span className="font-medium">{entry.new_status}</span>{" "}
-                            <span className="text-slate-400">
+                            <span className="text-slate-500">
                               ({new Date(entry.changed_at).toLocaleString()})
                             </span>
-                            {entry.note && <span className="italic text-slate-500"> — {entry.note}</span>}
+                            {entry.note && (
+                              <span className="italic text-slate-500"> — {entry.note}</span>
+                            )}
                           </li>
                         ))}
                       </ol>

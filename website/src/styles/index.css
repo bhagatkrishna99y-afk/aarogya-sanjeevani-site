@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+/*
+ * Self-hosted fonts via Fontsource (no external/render-blocking request to
+ * Google Fonts or any other CDN -- these files ship in node_modules and are
+ * bundled by Vite like any other asset). Only the weights actually used by
+ * the type scale below are imported, and only the `latin` subset -- the
+ * unscoped `/400.css`-style import pulls every script Noto Sans ships
+ * (Cyrillic, Devanagari, Greek, ...), which is real, needless payload for
+ * a site that is Latin-script-only today. If Hindi copy is ever added,
+ * switch these two Noto Sans lines to also import the `devanagari`
+ * subset (`@fontsource/noto-sans/devanagari-400.css` etc.) rather than
+ * reverting to the unscoped import.
+ */
+@import "@fontsource/figtree/latin-500.css";
+@import "@fontsource/figtree/latin-600.css";
+@import "@fontsource/figtree/latin-700.css";
+@import "@fontsource/noto-sans/latin-400.css";
+@import "@fontsource/noto-sans/latin-500.css";
+@import "@fontsource/noto-sans/latin-600.css";
+
+/*
+ * ============================================================================
+ * DESIGN TOKENS
+ * ============================================================================
+ * Tailwind v4 is CSS-first -- this @theme block *is* this project's
+ * "tailwind.config": every `--color-*`/`--font-*` variable declared here
+ * both configures Tailwind's generated utility classes (e.g. `--color-
+ * accent-700` below generates `bg-accent-700`, `text-accent-700`, etc.)
+ * AND is emitted as a real, inspectable CSS custom property
+ * (`var(--color-accent-700)`) usable anywhere, including outside Tailwind
+ * utilities. There is no separate tailwind.config.js file in a v4 project.
+ *
+ * Full verified contrast table (every pairing actually used for text,
+ * computed with the WCAG 2 relative-luminance formula, not estimated):
+ * see docs/design-tokens.md. This file's job is the token values
+ * themselves; the doc's job is proving they're compliant. The /styleguide
+ * route (dev-only) also renders every swatch with its live ratio.
+ *
+ * Spacing, radius and shadow scales are Tailwind's own defaults
+ * (unmodified) -- its spacing scale already is a 4px rhythm (space-1 =
+ * 4px, space-2 = 8px, space-4 = 16px, ...) and its radius/shadow scales
+ * are already a coherent progression, so there was nothing to add there.
+ * See docs/design-tokens.md for which exact steps this project's
+ * components use.
+ * ============================================================================
+ */
+@theme {
+  /* ---- Typography --------------------------------------------------- */
+  /* Humanist sans pairing: Figtree (headings) has a touch of warmth/
+     character; Noto Sans (body) is built for maximum legibility across
+     scripts and sizes -- a deliberately "serious, legible, dependable"
+     choice for healthcare body copy over something more stylized. */
+  --font-heading: "Figtree", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body: "Noto Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* ---- Primary: "brand" (deep teal) ---------------------------------- */
+  /* Unchanged from the existing values already used throughout the site
+     (nav, buttons, focus ring) -- kept as the single primary scale rather
+     than introducing a parallel "primary-*" name. Text/solid-button use:
+     700 (5.47:1). Decorative-only (borders, rings, icons with no adjacent
+     text needing 4.5:1): 600 (3.74:1, clears the 3:1 non-text minimum). */
+  --color-brand-50: #f0fdfa;
+  --color-brand-100: #ccfbf1;
+  --color-brand-200: #99f6e4;
+  --color-brand-300: #5eead4;
+  --color-brand-400: #2dd4bf;
+  --color-brand-500: #14b8a6;
+  --color-brand-600: #0d9488;
+  --color-brand-700: #0f766e;
+  --color-brand-800: #115e59;
+  --color-brand-900: #134e4a;
+
+  /* ---- Accent: warm CTA (orange) -------------------------------------
+     Near-complementary to the teal primary -- reads as energetic without
+     tipping into "alarm" (that's what the red error scale is for).
+     Text/solid-button use: 700 (5.18:1 with white text). Decorative-only
+     (borders/icons, 3:1 minimum): 600 (3.56:1). Soft surface + text: 50
+     background with 800 or 900 text (6.88:1 / 8.83:1). */
+  --color-accent-50: #fff7ed;
+  --color-accent-100: #ffedd5;
+  --color-accent-200: #fed7aa;
+  --color-accent-300: #fdba74;
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f97316;
+  --color-accent-600: #ea580c;
+  --color-accent-700: #c2410c;
+  --color-accent-800: #9a3412;
+  --color-accent-900: #7c2d12;
+
+  /* ---- Semantic: success (emerald) ------------------------------------
+     Text/solid-button use: 700 (5.21:1 on success-50, 5.48:1 with white
+     text). 600 is decorative-only (3.77:1 -- clears 3:1, not 4.5:1). */
+  --color-success-50: #ecfdf5;
+  --color-success-100: #d1fae5;
+  --color-success-200: #a7f3d0;
+  --color-success-300: #6ee7b7;
+  --color-success-400: #34d399;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+  --color-success-800: #065f46;
+  --color-success-900: #064e3b;
+
+  /* ---- Semantic: warning (amber) ---------------------------------------
+     Text/solid-button use: 700 (4.84:1 on warning-50, 5.02:1 with white
+     text -- the tightest margin of any pairing in this palette, so never
+     substitute a lighter shade here). 500 works as a solid badge fill
+     only when paired with slate-900 text (8.31:1), never white text. */
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-200: #fde68a;
+  --color-warning-300: #fcd34d;
+  --color-warning-400: #fbbf24;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+  --color-warning-800: #92400e;
+  --color-warning-900: #78350f;
+
+  /* ---- Semantic: error (red) -------------------------------------------
+     Text/solid-button use: 700 (5.91:1 on error-50, 6.47:1 with white
+     text) -- matches the red-50/red-700 pair already used by ErrorState
+     before this design system existed, so nothing there needs to change. */
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-200: #fecaca;
+  --color-error-300: #fca5a5;
+  --color-error-400: #f87171;
+  --color-error-500: #ef4444;
+  --color-error-600: #dc2626;
+  --color-error-700: #b91c1c;
+  --color-error-800: #991b1b;
+  --color-error-900: #7f1d1d;
+
+  /* ---- Semantic: info (sky) --------------------------------------------
+     Text/solid-button use: 700 (5.57:1 on info-50, 5.93:1 with white
+     text). 600 is decorative-only for icons/borders (passes 3:1, fails
+     4.5:1 with white text -- never put white text on info-600). */
+  --color-info-50: #f0f9ff;
+  --color-info-100: #e0f2fe;
+  --color-info-200: #bae6fd;
+  --color-info-300: #7dd3fc;
+  --color-info-400: #38bdf8;
+  --color-info-500: #0ea5e9;
+  --color-info-600: #0284c7;
+  --color-info-700: #0369a1;
+  --color-info-800: #075985;
+  --color-info-900: #0c4a6e;
+
+  /* Neutral/background scale: Tailwind's built-in `slate-*` (already used
+     throughout the site -- profiles.md's own convention, see
+     docs/design-tokens.md) rather than a redundant "neutral-*" alias. */
+}
+
+html {
+  color-scheme: light;
+  /* `--header-height` is kept in sync with the real rendered header
+     height by Header.tsx's ResizeObserver (it legitimately differs
+     between the mobile and desktop layouts) -- this makes any in-page
+     anchor jump (a #hash link, or the skip link's own target) land
+     below the sticky header instead of underneath it. The fallback
+     value only matters for the instant before that effect runs. */
+  scroll-padding-top: var(--header-height, 64px);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+/* Visible keyboard focus ring everywhere, for keyboard navigation (rule 8). */
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+}
+
+/* Respect the user's OS-level motion preference -- any animation/transition
+   added by a component (Skeleton's pulse, Accordion's expand, etc.) must
+   check this rather than assume motion is always wanted. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

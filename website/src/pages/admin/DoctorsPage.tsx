@@ -3,9 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import type { Enums, Tables } from "../../lib/database.types";
 import { EmptyState, ErrorState, LoadingState, FRIENDLY_ERROR } from "../../components/StatusViews";
+import { Seo } from "@/components/seo/Seo";
 
 type DoctorStatus = Enums<"doctor_status">;
-type DoctorRow = Tables<"doctor_profiles"> & { profiles: Pick<Tables<"profiles">, "full_name" | "phone"> };
+type DoctorRow = Tables<"doctor_profiles"> & {
+  profiles: Pick<Tables<"profiles">, "full_name" | "phone">;
+};
 
 const TABS: { value: DoctorStatus; label: string }[] = [
   { value: "pending", label: "Pending" },
@@ -66,9 +69,14 @@ export function DoctorsPage() {
 
   return (
     <div>
+      <Seo title="Doctors" />
       <h1 className="text-2xl font-bold text-slate-900">Doctors</h1>
 
-      <div role="tablist" aria-label="Doctor status" className="mt-4 flex gap-1 border-b border-slate-200">
+      <div
+        role="tablist"
+        aria-label="Doctor status"
+        className="mt-4 flex gap-1 border-b border-slate-200"
+      >
         {TABS.map((tab) => (
           <button
             key={tab.value}
@@ -112,7 +120,9 @@ export function DoctorsPage() {
                     {doctor.profiles.phone && (
                       <p className="text-xs text-slate-500">Phone: {doctor.profiles.phone}</p>
                     )}
-                    {doctor.bio && <p className="mt-2 max-w-xl text-sm text-slate-600">{doctor.bio}</p>}
+                    {doctor.bio && (
+                      <p className="mt-2 max-w-xl text-sm text-slate-600">{doctor.bio}</p>
+                    )}
                     {doctor.rejection_reason && (
                       <p className="mt-2 text-sm text-red-700">Reason: {doctor.rejection_reason}</p>
                     )}
@@ -165,7 +175,7 @@ function DoctorActions({
             <button
               disabled={busy}
               onClick={onApprove}
-              className={`${buttonClass} bg-brand-600 text-white hover:bg-brand-700`}
+              className={`${buttonClass} bg-brand-700 text-white hover:bg-brand-800`}
             >
               Approve
             </button>
@@ -224,7 +234,7 @@ function DoctorActions({
       <button
         disabled={busy}
         onClick={onReactivate}
-        className={`${buttonClass} bg-brand-600 text-white hover:bg-brand-700`}
+        className={`${buttonClass} bg-brand-700 text-white hover:bg-brand-800`}
       >
         Reactivate
       </button>

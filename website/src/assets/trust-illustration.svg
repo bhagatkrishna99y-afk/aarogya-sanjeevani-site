@@ -1,0 +1,30 @@
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    Original, hand-authored abstract artwork for the Trust & Safety
+    section: a rounded lock shape with a checkmark, representing
+    privacy and account security. Plain original geometry, not a
+    reproduction of any stock icon, logo, or copyrighted character.
+  -->
+  <rect x="0" y="0" width="320" height="320" rx="28" fill="#fff7ed" />
+
+  <rect x="90" y="150" width="140" height="110" rx="18" fill="#0f766e" />
+  <path
+    d="M115 150 V 115 C 115 85 137 65 160 65 C 183 65 205 85 205 115 V 150"
+    stroke="#115e59"
+    stroke-width="16"
+    fill="none"
+  />
+
+  <circle cx="160" cy="205" r="10" fill="#f0fdfa" />
+  <rect x="152" y="205" width="16" height="36" rx="8" fill="#f0fdfa" />
+
+  <circle cx="245" cy="95" r="22" fill="#c2410c" />
+  <path
+    d="M235 95 L 243 103 L 257 87"
+    stroke="#ffffff"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>

@@ -16,6 +16,16 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Strictness */
+    "strict": true,
+
+    /* Path alias -- TS 7 removed `baseUrl`; `paths` now resolves relative
+       to this tsconfig file's own directory, which is the same place
+       `baseUrl: "."` used to point to anyway. */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,

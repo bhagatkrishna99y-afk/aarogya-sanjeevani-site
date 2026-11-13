@@ -4,7 +4,10 @@ import { Spinner } from "./FullPageSpinner";
 
 export function LoadingState({ label = "Loading…" }: { label?: string }) {
   return (
-    <div className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500" role="status">
+    <div
+      className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500"
+      role="status"
+    >
       <Spinner className="h-5 w-5" />
       {label}
     </div>

@@ -1,91 +1,115 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
-import type { Tables } from "../../lib/database.types";
-import { EmptyState, ErrorState, LoadingState, FRIENDLY_ERROR } from "../../components/StatusViews";
-
-type Category = Tables<"service_categories"> & { services: Tables<"services">[] };
+import { Alert } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
+import { Container } from "@/components/ui/Container";
+import { Icon } from "@/components/ui/Icon";
+import { LinkButton } from "@/components/ui/LinkButton";
+import { Section } from "@/components/ui/Section";
+import { StepCard } from "@/components/ui/StepCard";
+import { Seo } from "@/components/seo/Seo";
+import { SERVICE_MODE_LABEL, servicesContent } from "@/content/services";
 
 export function ServicesPage() {
-  const [categories, setCategories] = useState<Category[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    let active = true;
-    setCategories(null);
-    setError(null);
-
-    supabase
-      .from("service_categories")
-      .select("*, services(*)")
-      .eq("is_active", true)
-      .order("sort_order")
-      .then(({ data, error: fetchError }) => {
-        if (!active) return;
-        if (fetchError) {
-          setError(FRIENDLY_ERROR);
-          return;
-        }
-        setCategories((data ?? []) as Category[]);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [reloadKey]);
+  const { intro, categories, howRequesting, emergencyNotice, appCta } = servicesContent;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-bold text-slate-900">Services</h1>
-      <p className="mt-2 max-w-2xl text-slate-600">
-        Everything listed here can be booked from the Patient app. Services marked "no doctor
-        required" are walk-in or lab-style services.
-      </p>
+    <div>
+      <Seo
+        title="Services"
+        description="An overview of the kinds of healthcare services available through Aarogya Sanjeevani, requested from the Patient app."
+      />
 
-      <div className="mt-8">
-        {error && <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />}
-        {!error && categories === null && <LoadingState label="Loading services…" />}
-        {!error && categories !== null && categories.length === 0 && (
-          <EmptyState title="No services are available right now" description="Please check back soon." />
-        )}
-        {!error && categories !== null && categories.length > 0 && (
-          <div className="space-y-10">
-            {categories.map((category) => {
-              const activeServices = category.services.filter((s) => s.is_active);
-              if (activeServices.length === 0) return null;
-              return (
-                <section key={category.id}>
-                  <h2 className="text-xl font-semibold text-slate-900">{category.name}</h2>
-                  {category.description && (
-                    <p className="mt-1 text-sm text-slate-600">{category.description}</p>
-                  )}
-                  <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {activeServices.map((service) => (
-                      <li
-                        key={service.id}
-                        className="rounded-lg border border-slate-200 bg-white p-4"
-                      >
-                        <p className="font-medium text-slate-900">{service.name}</p>
-                        {service.description && (
-                          <p className="mt-1 text-sm text-slate-600">{service.description}</p>
-                        )}
-                        <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-                          <span className="rounded-full bg-slate-100 px-2 py-1">
-                            {service.duration_minutes} min
-                          </span>
-                          <span className="rounded-full bg-slate-100 px-2 py-1">
-                            {service.requires_doctor ? "Doctor required" : "No doctor required"}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              );
-            })}
+      <section aria-labelledby="services-intro-heading" className="py-16 sm:py-24">
+        <Container>
+          <div className="max-w-2xl">
+            <h1
+              id="services-intro-heading"
+              className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl"
+            >
+              {intro.heading}
+            </h1>
+            <p className="mt-4 text-lg text-slate-600">{intro.paragraph}</p>
           </div>
-        )}
-      </div>
+        </Container>
+      </section>
+
+      {categories.map((category, index) => (
+        <Section
+          key={category.name}
+          className={index % 2 === 0 ? "bg-white" : undefined}
+          heading={category.name}
+          description={category.description}
+        >
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {category.examples.map((example) => (
+              <li key={example.name}>
+                <Card>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+                    <Icon icon={category.icon} />
+                  </span>
+                  <p className="mt-4 font-semibold text-slate-900">{example.name}</p>
+                  <p className="mt-1 text-sm text-slate-600">{example.description}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {example.modes.map((mode) => (
+                      <Badge key={mode} variant="brand">
+                        {SERVICE_MODE_LABEL[mode]}
+                      </Badge>
+                    ))}
+                  </div>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ))}
+
+      <Section
+        className={categories.length % 2 === 0 ? "bg-white" : undefined}
+        heading={howRequesting.heading}
+        description={howRequesting.description}
+      >
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {howRequesting.steps.map((step, index) => (
+            <StepCard
+              key={step.title}
+              step={index + 1}
+              title={step.title}
+              description={step.description}
+            />
+          ))}
+        </div>
+      </Section>
+
+      <section aria-label="Emergency notice" className="py-8">
+        <Container>
+          <Alert variant="warning" title={emergencyNotice.title}>
+            <p>{emergencyNotice.body}</p>
+          </Alert>
+        </Container>
+      </section>
+
+      <section aria-labelledby="services-app-cta-heading" className="py-16 sm:py-24">
+        <Container>
+          <div className="rounded-2xl bg-brand-50 px-6 py-12 text-center sm:px-12">
+            <h2
+              id="services-app-cta-heading"
+              className="text-2xl font-bold text-slate-900 sm:text-3xl"
+            >
+              {appCta.heading}
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-base text-slate-600">{appCta.description}</p>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <LinkButton href={appCta.patient.href} variant="primary" size="lg">
+                {appCta.patient.label}
+              </LinkButton>
+              <LinkButton href={appCta.doctor.href} variant="secondary" size="lg">
+                {appCta.doctor.label}
+              </LinkButton>
+            </div>
+          </div>
+        </Container>
+      </section>
     </div>
   );
 }
