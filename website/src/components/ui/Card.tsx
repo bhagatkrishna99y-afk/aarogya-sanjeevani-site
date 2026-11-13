@@ -8,7 +8,11 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
-      className={["rounded-xl border border-slate-200 bg-white p-5 shadow-sm", className]
+      className={[
+        "rounded-2xl border border-slate-200/70 bg-white p-6 shadow-elevation-2",
+        "transition-shadow duration-300 hover:shadow-elevation-3",
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
       {...props}

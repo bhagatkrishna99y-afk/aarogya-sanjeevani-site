@@ -9,14 +9,17 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "accent";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors " +
-  "disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-lg font-medium " +
+  "transition-[background-color,box-shadow,transform] duration-200 active:scale-[0.98] " +
+  "disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-brand-700 text-white hover:bg-brand-800",
-  secondary: "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
+  primary: "bg-brand-700 text-white shadow-elevation-2 hover:bg-brand-800 hover:shadow-elevation-3",
+  secondary:
+    "border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50",
   ghost: "text-brand-700 hover:bg-brand-50",
-  accent: "bg-accent-700 text-white hover:bg-accent-800",
+  accent:
+    "bg-accent-700 text-white shadow-elevation-2 hover:bg-accent-800 hover:shadow-elevation-3",
 };
 
 // min-h-[48px]/[44px] guarantee the touch-target minimum regardless of

@@ -36,7 +36,15 @@ export function HeroSection() {
             <p className="mt-6 text-sm font-medium text-slate-500">{trustLine}</p>
           </div>
 
-          <div className="mx-auto w-full max-w-md lg:max-w-none">
+          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+            {/* Decorative depth glow -- purely visual, not the illustration
+                itself (that SVG is never redrawn/altered). aria-hidden and
+                behind the image via negative z-index, so it adds zero risk
+                to the actual content or its alt text. */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-8 -z-10 rounded-full bg-gradient-to-br from-brand-200/50 to-accent-200/40 blur-3xl"
+            />
             {/* Above the fold -- the first meaningful visual on the page,
                 so not lazy-loaded (lazy-loading something this high up
                 would delay it, not help). */}
@@ -45,7 +53,7 @@ export function HeroSection() {
               alt="Illustration of a shield with a heartbeat line and a small care cross, representing secure, connected healthcare"
               width={480}
               height={420}
-              className="h-auto w-full"
+              className="relative h-auto w-full"
             />
           </div>
         </div>

@@ -96,7 +96,7 @@ export function AboutPage() {
 
       <section aria-labelledby="about-cta-heading" className="py-16 sm:py-24">
         <Container>
-          <div className="rounded-2xl bg-brand-50 px-6 py-12 text-center sm:px-12">
+          <div className="rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100/50 px-6 py-12 text-center shadow-elevation-2 ring-1 ring-brand-100 sm:px-12">
             <h2 id="about-cta-heading" className="text-2xl font-bold text-slate-900 sm:text-3xl">
               {closingCta.heading}
             </h2>
