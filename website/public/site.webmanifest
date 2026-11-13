@@ -1,0 +1,13 @@
+{
+  "name": "Aarogya Sanjeevani",
+  "short_name": "Aarogya Sanjeevani",
+  "description": "Discover approved doctors and services, and track your care requests.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f766e",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
