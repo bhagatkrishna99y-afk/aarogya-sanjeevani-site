@@ -19,14 +19,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
+
+/** How much smaller the initials are than the avatar's own diameter --
+ *  tuned so two initials sit comfortably inside the circle at every
+ *  [AsAvatar] call site in this app (40dp through 72dp). */
+private const val INITIALS_SIZE_DIVISOR = 2.2f
 
 /** A person's circular avatar: [imageUrl] when there is one and it loads,
  *  initials from [name] otherwise -- the fallback is never a generic
@@ -64,11 +71,25 @@ fun AsAvatar(
                 text = initialsOf(name),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.titleMedium,
-                fontSize = (size.value / 2.2).sp,
+                fontSize = initialsFontSize(size, LocalDensity.current),
             )
         }
     }
 }
+
+/** A plain `.sp` size here would scale with the user's system font-size
+ *  setting while [AsAvatar]'s own `size` (a [Dp]) never does -- at a
+ *  large enough setting the initials outgrow the fixed circle and
+ *  clip/overlap whatever sits next to it (seen at 200% font scale).
+ *  Deriving the [TextUnit] from the avatar's own [Dp] size via
+ *  [Density.toSp] instead keeps the initials' rendered size tied to the
+ *  avatar, immune to `fontScale`, the same way the circle itself
+ *  already is -- pulled out of the composable so this is testable
+ *  without a live Composition. */
+internal fun initialsFontSize(
+    size: Dp,
+    density: Density,
+): TextUnit = with(density) { (size / INITIALS_SIZE_DIVISOR).toSp() }
 
 private fun initialsOf(name: String): String =
     name
