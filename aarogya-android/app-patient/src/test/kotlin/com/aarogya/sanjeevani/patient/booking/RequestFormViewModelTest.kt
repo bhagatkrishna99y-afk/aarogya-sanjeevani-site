@@ -14,9 +14,12 @@ import com.aarogya.sanjeevani.core.testing.fake.FakeRequestsRepository
 import com.aarogya.sanjeevani.core.testing.fake.FakeServicesRepository
 import com.aarogya.sanjeevani.patient.navigation.RequestForm
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -26,6 +29,11 @@ private const val SERVICE_ID = "svc-1"
 private const val DOCTOR_ID = "doc-1"
 private val SOME_INSTANT = Instant.parse("2026-01-01T00:00:00Z")
 private val SLOT_START = Instant.parse("2026-01-05T03:30:00Z")
+private val FIXED_NOW = Instant.parse("2026-01-05T00:00:00Z")
+private val FIXED_CLOCK =
+    object : Clock {
+        override fun now() = FIXED_NOW
+    }
 
 /** Drives [RequestFormViewModel] directly via its `internal` route-based
  *  constructor (see that class's own doc comment for why: the real
@@ -59,6 +67,7 @@ class RequestFormViewModelTest {
     private fun viewModel(
         doctorId: String? = DOCTOR_ID,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        preAssignedSlot: Boolean = true,
     ) = RequestFormViewModel(
         servicesRepository = servicesRepository,
         doctorsRepository = doctorsRepository,
@@ -66,18 +75,21 @@ class RequestFormViewModelTest {
         profileRepository = profileRepository,
         requestsRepository = requestsRepository,
         savedStateHandle = savedStateHandle,
-        route = aRoute(doctorId),
+        clock = FIXED_CLOCK,
+        route = aRoute(doctorId, preAssignedSlot),
     )
 
-    private fun aRoute(doctorId: String?) =
-        RequestForm(
-            serviceId = SERVICE_ID,
-            serviceName = "General Checkup",
-            doctorId = doctorId,
-            doctorName = if (doctorId != null) "Dr. Asha Rao" else null,
-            slotStart = SLOT_START.toString(),
-            slotDurationMinutes = 30,
-        )
+    private fun aRoute(
+        doctorId: String?,
+        preAssignedSlot: Boolean = true,
+    ) = RequestForm(
+        serviceId = SERVICE_ID,
+        serviceName = "General Checkup",
+        doctorId = doctorId,
+        doctorName = if (doctorId != null) "Dr. Asha Rao" else null,
+        slotStart = if (preAssignedSlot) SLOT_START.toString() else null,
+        slotDurationMinutes = if (preAssignedSlot) 30 else null,
+    )
 
     @Test
     fun `only modes both the service and the doctor support are offered`() =
@@ -98,6 +110,79 @@ class RequestFormViewModelTest {
                 listOf(ServiceMode.IN_PERSON, ServiceMode.ONLINE, ServiceMode.HOME_VISIT),
                 context.availableModes,
             )
+        }
+
+    // ---- self-scheduled slot (no doctor, no pre-assigned slot) --------
+
+    @Test
+    fun `a no-doctor service with no pre-assigned slot needs a self-scheduled one`() =
+        runTest {
+            val viewModel = viewModel(doctorId = null, preAssignedSlot = false)
+
+            assertTrue(viewModel.uiState.value.needsSelfScheduledSlot)
+            assertNull(viewModel.uiState.value.effectiveSlotStart)
+        }
+
+    @Test
+    fun `Continue stays disabled until both a date and a time window are chosen`() =
+        runTest {
+            val viewModel = viewModel(doctorId = null, preAssignedSlot = false)
+            viewModel.onAction(RequestFormAction.ModeSelected(ServiceMode.IN_PERSON))
+            viewModel.onAction(RequestFormAction.ContactPhoneChanged("9876543210"))
+
+            assertFalse(viewModel.uiState.value.isValid)
+
+            viewModel.onAction(RequestFormAction.DateSelected(viewModel.uiState.value.today))
+            assertFalse(viewModel.uiState.value.isValid)
+
+            viewModel.onAction(RequestFormAction.TimeWindowSelected(TimeWindow.MORNING))
+            assertTrue(viewModel.uiState.value.isValid)
+        }
+
+    @Test
+    fun `a date plus a time window combine into the window's representative hour in Asia-Kolkata`() =
+        runTest {
+            val viewModel = viewModel(doctorId = null, preAssignedSlot = false)
+            val date = LocalDate(2026, 1, 10)
+
+            viewModel.onAction(RequestFormAction.DateSelected(date))
+            viewModel.onAction(RequestFormAction.TimeWindowSelected(TimeWindow.AFTERNOON))
+
+            // 1:00 pm IST == 07:30 UTC.
+            assertEquals(Instant.parse("2026-01-10T07:30:00Z"), viewModel.uiState.value.effectiveSlotStart)
+        }
+
+    @Test
+    fun `submitting a self-scheduled request sends the computed slot as p_slot_start`() =
+        runTest {
+            val viewModel = viewModel(doctorId = null, preAssignedSlot = false)
+            viewModel.onAction(RequestFormAction.ModeSelected(ServiceMode.IN_PERSON))
+            viewModel.onAction(RequestFormAction.ContactPhoneChanged("9876543210"))
+            viewModel.onAction(RequestFormAction.DateSelected(LocalDate(2026, 1, 10)))
+            viewModel.onAction(RequestFormAction.TimeWindowSelected(TimeWindow.MORNING))
+
+            viewModel.uiEvent.test {
+                viewModel.onAction(RequestFormAction.SubmitClicked)
+                assertEquals(RequestFormUiEvent.NavigateToSuccess, awaitItem())
+            }
+            // 9:00 am IST == 03:30 UTC.
+            val created = requestsRepository.patientRequests.last()
+            assertEquals(Instant.parse("2026-01-10T03:30:00Z"), created.scheduledStart)
+            assertNull(created.doctorId)
+        }
+
+    @Test
+    fun `selected date and time window survive a rotation via the shared SavedStateHandle`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val firstInstance = viewModel(doctorId = null, preAssignedSlot = false, savedStateHandle = handle)
+            firstInstance.onAction(RequestFormAction.DateSelected(LocalDate(2026, 1, 10)))
+            firstInstance.onAction(RequestFormAction.TimeWindowSelected(TimeWindow.EVENING))
+
+            val recreatedInstance = viewModel(doctorId = null, preAssignedSlot = false, savedStateHandle = handle)
+
+            assertEquals(LocalDate(2026, 1, 10), recreatedInstance.uiState.value.selectedDate)
+            assertEquals(TimeWindow.EVENING, recreatedInstance.uiState.value.selectedTimeWindow)
         }
 
     @Test

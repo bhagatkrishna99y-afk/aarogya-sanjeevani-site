@@ -13,13 +13,17 @@ import com.aarogya.sanjeevani.core.data.requests.NewServiceRequest
 import com.aarogya.sanjeevani.core.data.requests.RequestsRepository
 import com.aarogya.sanjeevani.core.data.services.ServicesRepository
 import com.aarogya.sanjeevani.core.ui.mvi.BaseViewModel
+import com.aarogya.sanjeevani.patient.doctors.CLINIC_TIME_ZONE
 import com.aarogya.sanjeevani.patient.navigation.RequestForm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 
 private val DOCTOR_UNAVAILABLE_CODES = setOf("AS002_DOCTOR_NOT_AVAILABLE", "AS018_DOCTOR_NOT_APPROVED")
@@ -58,6 +62,7 @@ class RequestFormViewModel
         private val profileRepository: ProfileRepository,
         private val requestsRepository: RequestsRepository,
         private val savedStateHandle: SavedStateHandle,
+        clock: Clock,
         route: RequestForm,
     ) : BaseViewModel<RequestFormUiState, RequestFormUiEvent, RequestFormAction>(
             RequestFormUiState(
@@ -67,10 +72,13 @@ class RequestFormViewModel
                 doctorName = route.doctorName,
                 slotStart = route.slotStart?.let { Instant.parse(it) },
                 slotDurationMinutes = route.slotDurationMinutes,
+                today = clock.now().toLocalDateTime(CLINIC_TIME_ZONE).date,
                 selectedMode = savedStateHandle.get<String>(KEY_MODE)?.let { ServiceMode.valueOf(it) },
                 contactPhone = savedStateHandle[KEY_CONTACT_PHONE] ?: "",
                 address = savedStateHandle[KEY_ADDRESS] ?: "",
                 notes = savedStateHandle[KEY_NOTES] ?: "",
+                selectedDate = savedStateHandle.get<String>(KEY_SELECTED_DATE)?.let(LocalDate::parse),
+                selectedTimeWindow = savedStateHandle.get<String>(KEY_TIME_WINDOW)?.let(TimeWindow::valueOf),
             ),
         ) {
         @Inject
@@ -81,6 +89,7 @@ class RequestFormViewModel
             profileRepository: ProfileRepository,
             requestsRepository: RequestsRepository,
             savedStateHandle: SavedStateHandle,
+            clock: Clock,
         ) : this(
             servicesRepository,
             doctorsRepository,
@@ -88,6 +97,7 @@ class RequestFormViewModel
             profileRepository,
             requestsRepository,
             savedStateHandle,
+            clock,
             savedStateHandle.toRoute<RequestForm>(),
         )
 
@@ -96,6 +106,8 @@ class RequestFormViewModel
             persist(KEY_CONTACT_PHONE) { it.contactPhone }
             persist(KEY_ADDRESS) { it.address }
             persist(KEY_NOTES) { it.notes }
+            persist(KEY_SELECTED_DATE) { it.selectedDate?.toString() }
+            persist(KEY_TIME_WINDOW) { it.selectedTimeWindow?.name }
             loadContext()
         }
 
@@ -117,6 +129,8 @@ class RequestFormViewModel
             when (action) {
                 RequestFormAction.Retry -> loadContext()
                 is RequestFormAction.ModeSelected -> setState { copy(selectedMode = action.mode) }
+                is RequestFormAction.DateSelected -> setState { copy(selectedDate = action.date) }
+                is RequestFormAction.TimeWindowSelected -> setState { copy(selectedTimeWindow = action.window) }
                 is RequestFormAction.ContactPhoneChanged -> setState { copy(contactPhone = action.value) }
                 RequestFormAction.ContactPhoneFocusLost -> setState { copy(contactPhoneTouched = true) }
                 is RequestFormAction.AddressChanged -> setState { copy(address = action.value) }
@@ -134,7 +148,7 @@ class RequestFormViewModel
                 coroutineScope {
                     val modesJob = launch { loadAvailableModes() }
                     val phoneJob = launch { if (wasPhoneBlank) prefillContactPhone() }
-                    val policyJob = launch { loadCancellationPolicy() }
+                    val policyJob = launch { loadBookingSettings() }
                     modesJob.join()
                     phoneJob.join()
                     policyJob.join()
@@ -185,11 +199,24 @@ class RequestFormViewModel
          *  off [com.aarogya.sanjeevani.core.data.requests.BookingSettings.cancellationNoticeMinutes]
          *  -- never a hardcoded string -- so a silent failure here just
          *  means that line falls back to not showing a number, same
-         *  decorative-convenience reasoning as [prefillContactPhone]. */
-        private suspend fun loadCancellationPolicy() {
+         *  decorative-convenience reasoning as [prefillContactPhone].
+         *  [com.aarogya.sanjeevani.core.data.requests.BookingSettings.maxHorizonDays]
+         *  from this same call also bounds the self-scheduled date
+         *  picker ([RequestFormUiState.needsSelfScheduledSlot]) -- unlike
+         *  the cancellation line, a failure here is NOT purely
+         *  decorative for that case (the picker has no real backend-
+         *  given upper bound to show until this succeeds), but retrying
+         *  the whole screen via [RequestFormAction.Retry] already covers
+         *  that -- no separate error state needed just for this. */
+        private suspend fun loadBookingSettings() {
             when (val result = requestsRepository.getBookingSettings()) {
                 is AppResult.Success ->
-                    setState { copy(cancellationNoticeMinutes = result.data.cancellationNoticeMinutes) }
+                    setState {
+                        copy(
+                            cancellationNoticeMinutes = result.data.cancellationNoticeMinutes,
+                            maxHorizonDays = result.data.maxHorizonDays,
+                        )
+                    }
                 is AppResult.Failure -> Unit
             }
         }
@@ -202,7 +229,7 @@ class RequestFormViewModel
         private fun submit() {
             val state = currentState
             val mode = state.selectedMode
-            val slotStart = state.slotStart
+            val slotStart = state.effectiveSlotStart
             if (state.isSubmitting || mode == null || slotStart == null) return
 
             setState { copy(isSubmitting = true) }
@@ -245,5 +272,7 @@ class RequestFormViewModel
             private const val KEY_CONTACT_PHONE = "request_form_contact_phone"
             private const val KEY_ADDRESS = "request_form_address"
             private const val KEY_NOTES = "request_form_notes"
+            private const val KEY_SELECTED_DATE = "request_form_selected_date"
+            private const val KEY_TIME_WINDOW = "request_form_time_window"
         }
     }

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,6 +29,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,6 +46,7 @@ import com.aarogya.sanjeevani.core.designsystem.component.SkeletonShimmer
 import com.aarogya.sanjeevani.core.designsystem.component.loadingGroupSemantics
 import com.aarogya.sanjeevani.core.designsystem.theme.AsTheme
 import com.aarogya.sanjeevani.core.ui.state.ErrorContent
+import com.aarogya.sanjeevani.patient.doctors.DateStrip
 import com.aarogya.sanjeevani.patient.services.icon
 import com.aarogya.sanjeevani.patient.services.label
 
@@ -128,7 +135,12 @@ private fun RequestFormContent(
     ) {
         SummaryCard(uiState = uiState)
 
-        if (uiState.slotStart == null) {
+        if (uiState.needsSelfScheduledSlot) {
+            SelfScheduledSlotPicker(uiState = uiState, onAction = onAction)
+        } else if (uiState.slotStart == null) {
+            // Defensive fallback only -- the doctor flow always arrives
+            // here with a slot already chosen on the Availability
+            // screen; this should never actually render.
             Text(
                 text = "Choosing a date and time for this service isn't available yet.",
                 style = MaterialTheme.typography.bodyMedium,
@@ -158,9 +170,99 @@ private fun RequestFormContent(
         AsButton(
             text = "Continue",
             onClick = { onAction(RequestFormAction.ContinueClicked) },
-            enabled = uiState.slotStart != null,
+            enabled = uiState.effectiveSlotStart != null,
             modifier = Modifier.fillMaxWidth(),
         )
+    }
+}
+
+/** The no-doctor booking path: a date (bounded by the backend's own
+ *  [RequestFormUiState.maxHorizonDays], never hardcoded) plus a
+ *  preferred [TimeWindow] -- `create_service_request` still needs one
+ *  concrete `p_slot_start` either way (`backend/docs/client-contract.md`),
+ *  so each window maps to a representative hour rather than a real
+ *  availability-grid slot, which doesn't exist for a service with no
+ *  doctor to book against. */
+@Composable
+private fun SelfScheduledSlotPicker(
+    uiState: RequestFormUiState,
+    onAction: (RequestFormAction) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(AsTheme.spacing.sm)) {
+        Text(text = "Preferred date", style = MaterialTheme.typography.titleSmall)
+        val maxHorizonDays = uiState.maxHorizonDays
+        if (maxHorizonDays != null) {
+            DateStrip(
+                today = uiState.today,
+                selectedDate = uiState.selectedDate ?: uiState.today,
+                maxHorizonDays = maxHorizonDays,
+                onDateSelected = { date -> onAction(RequestFormAction.DateSelected(date)) },
+            )
+        } else {
+            SkeletonShimmer(modifier = Modifier.fillMaxWidth().height(72.dp))
+        }
+
+        Text(text = "Preferred time", style = MaterialTheme.typography.titleSmall)
+        TimeWindowChips(
+            selected = uiState.selectedTimeWindow,
+            onSelected = { window -> onAction(RequestFormAction.TimeWindowSelected(window)) },
+        )
+    }
+}
+
+@Composable
+private fun TimeWindowChips(
+    selected: TimeWindow?,
+    onSelected: (TimeWindow) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy(AsTheme.spacing.sm),
+    ) {
+        TimeWindow.entries.forEach { window ->
+            val isSelected = window == selected
+            Surface(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .selectable(
+                            selected = isSelected,
+                            onClick = { onSelected(window) },
+                            role = Role.RadioButton,
+                        )
+                        .semantics {
+                            contentDescription = window.label
+                            stateDescription = if (isSelected) "Selected" else "Not selected"
+                        },
+                color =
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
+                contentColor =
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+            ) {
+                Row(
+                    modifier = Modifier.padding(AsTheme.spacing.md),
+                    horizontalArrangement = Arrangement.spacedBy(AsTheme.spacing.xs),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(text = window.label, style = MaterialTheme.typography.bodyMedium)
+                    if (isSelected) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -176,7 +278,7 @@ private fun SummaryCard(uiState: RequestFormUiState) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            val slotStart = uiState.slotStart
+            val slotStart = uiState.effectiveSlotStart
             if (slotStart != null) {
                 Text(
                     text = formatSlotSummary(slotStart, uiState.slotDurationMinutes),

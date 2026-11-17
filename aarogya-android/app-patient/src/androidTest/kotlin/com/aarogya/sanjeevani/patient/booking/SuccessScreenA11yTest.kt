@@ -4,6 +4,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
+import kotlinx.datetime.LocalDate
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +33,7 @@ class SuccessScreenA11yTest {
                             doctorName = "Dr. Asha Rao",
                             slotStart = null,
                             slotDurationMinutes = null,
+                            today = LocalDate(2026, 1, 1),
                             submittedRequestId = "req-1",
                         ),
                     onDoneClick = {},

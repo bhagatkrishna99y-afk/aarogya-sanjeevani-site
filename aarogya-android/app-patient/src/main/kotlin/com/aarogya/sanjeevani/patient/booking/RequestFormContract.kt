@@ -2,7 +2,29 @@ package com.aarogya.sanjeevani.patient.booking
 
 import com.aarogya.sanjeevani.core.common.error.AppError
 import com.aarogya.sanjeevani.core.data.model.ServiceMode
+import com.aarogya.sanjeevani.patient.doctors.CLINIC_TIME_ZONE
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.toInstant
+
+/**
+ * A patient's preferred part of the day for a service that has no
+ * doctor (and so no real-availability slot grid) to choose a precise
+ * time from -- `backend/docs/client-contract.md`'s `create_service_request`
+ * still needs one concrete `p_slot_start` either way, so each window
+ * maps to one representative hour in [CLINIC_TIME_ZONE], the same
+ * timezone every other slot-time calculation in this app already uses.
+ * Each hour below *is* the named constant detekt wants -- it's the
+ * window's own representative hour.
+ */
+@Suppress("MagicNumber")
+enum class TimeWindow(val label: String, val representativeHour: Int) {
+    MORNING("Morning", 9),
+    AFTERNOON("Afternoon", 13),
+    EVENING("Evening", 17),
+}
 
 /** The one-time context a service/doctor pairing needs before the form
  *  can render meaningfully -- which [ServiceMode]s both actually
@@ -36,6 +58,7 @@ data class RequestFormUiState(
     val doctorName: String?,
     val slotStart: Instant?,
     val slotDurationMinutes: Int?,
+    val today: LocalDate,
     val contextState: RequestFormContextState = RequestFormContextState.Loading,
     val selectedMode: ServiceMode? = null,
     val contactPhone: String = "",
@@ -47,12 +70,36 @@ data class RequestFormUiState(
     val isSubmitting: Boolean = false,
     val submittedRequestId: String? = null,
     val cancellationNoticeMinutes: Int? = null,
+    val maxHorizonDays: Int? = null,
+    val selectedDate: LocalDate? = null,
+    val selectedTimeWindow: TimeWindow? = null,
 ) {
     val fieldErrors: Map<String, RequestFormFieldError>
         get() = RequestFormValidation.validate(selectedMode, contactPhone, address, notes)
 
+    /** True for a service with no doctor (so no availability-grid slot
+     *  ever arrives as a nav arg) -- the only case where this screen
+     *  itself has to ask for a preferred date and time window. */
+    val needsSelfScheduledSlot: Boolean
+        get() = doctorId == null && slotStart == null
+
+    /** The doctor-flow's pre-assigned [slotStart] if there is one,
+     *  otherwise [selectedDate] + [selectedTimeWindow] combined into one
+     *  concrete instant for a self-scheduled, no-doctor request -- the
+     *  one value [RequestFormViewModel.submit] actually sends as
+     *  `p_slot_start`. Null until both parts of a self-scheduled pick
+     *  are in. */
+    val effectiveSlotStart: Instant?
+        get() =
+            slotStart ?: selectedDate?.let { date ->
+                selectedTimeWindow?.let { window ->
+                    LocalDateTime(date, LocalTime(hour = window.representativeHour, minute = 0))
+                        .toInstant(CLINIC_TIME_ZONE)
+                }
+            }
+
     val isValid: Boolean
-        get() = selectedMode != null && fieldErrors.isEmpty()
+        get() = selectedMode != null && fieldErrors.isEmpty() && effectiveSlotStart != null
 }
 
 /**
@@ -83,6 +130,12 @@ sealed interface RequestFormAction {
     data object Retry : RequestFormAction
 
     data class ModeSelected(val mode: ServiceMode) : RequestFormAction
+
+    /** Only meaningful when [RequestFormUiState.needsSelfScheduledSlot]. */
+    data class DateSelected(val date: LocalDate) : RequestFormAction
+
+    /** Only meaningful when [RequestFormUiState.needsSelfScheduledSlot]. */
+    data class TimeWindowSelected(val window: TimeWindow) : RequestFormAction
 
     data class ContactPhoneChanged(val value: String) : RequestFormAction
 

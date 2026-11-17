@@ -161,7 +161,7 @@ private fun ReviewSummaryCard(uiState: RequestFormUiState) {
             if (uiState.doctorName != null) {
                 ReviewRow(label = "Doctor", value = uiState.doctorName)
             }
-            val slotStart = uiState.slotStart
+            val slotStart = uiState.effectiveSlotStart
             if (slotStart != null) {
                 ReviewRow(label = "Date & time", value = formatSlotSummary(slotStart, uiState.slotDurationMinutes))
             }
