@@ -48,7 +48,7 @@ fun DoctorCard(
                 verticalArrangement = Arrangement.spacedBy(AsTheme.spacing.xs),
             ) {
                 Text(
-                    text = doctor.title?.let { "$it ${doctor.fullName}" } ?: doctor.fullName,
+                    text = doctorDisplayName(doctor.fullName, doctor.title),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(

@@ -200,7 +200,7 @@ private fun DoctorHeader(
         AsAvatar(name = doctor.fullName, imageUrl = avatarUrl, size = 72.dp)
         Column(verticalArrangement = Arrangement.spacedBy(AsTheme.spacing.xs)) {
             Text(
-                text = doctor.title?.let { "$it ${doctor.fullName}" } ?: doctor.fullName,
+                text = doctorDisplayName(doctor.fullName, doctor.title),
                 style = MaterialTheme.typography.headlineSmall,
             )
             Text(
