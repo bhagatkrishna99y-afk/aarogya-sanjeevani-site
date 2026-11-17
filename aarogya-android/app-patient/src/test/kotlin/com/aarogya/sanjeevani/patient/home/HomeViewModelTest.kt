@@ -9,6 +9,7 @@ import com.aarogya.sanjeevani.core.data.requests.PatientRequest
 import com.aarogya.sanjeevani.core.data.services.ServiceCategory
 import com.aarogya.sanjeevani.core.testing.MainDispatcherRule
 import com.aarogya.sanjeevani.core.testing.fake.FakeAuthRepository
+import com.aarogya.sanjeevani.core.testing.fake.FakeConnectivityObserver
 import com.aarogya.sanjeevani.core.testing.fake.FakeDoctorsRepository
 import com.aarogya.sanjeevani.core.testing.fake.FakeProfileRepository
 import com.aarogya.sanjeevani.core.testing.fake.FakeRequestsRepository
@@ -46,6 +47,7 @@ class HomeViewModelTest {
     private lateinit var servicesRepository: FakeServicesRepository
     private lateinit var requestsRepository: FakeRequestsRepository
     private lateinit var doctorsRepository: FakeDoctorsRepository
+    private lateinit var connectivityObserver: FakeConnectivityObserver
     private lateinit var viewModel: HomeViewModel
 
     @Before
@@ -55,6 +57,7 @@ class HomeViewModelTest {
         servicesRepository = FakeServicesRepository()
         requestsRepository = FakeRequestsRepository()
         doctorsRepository = FakeDoctorsRepository()
+        connectivityObserver = FakeConnectivityObserver()
         viewModel =
             HomeViewModel(
                 authRepository = authRepository,
@@ -63,6 +66,7 @@ class HomeViewModelTest {
                 requestsRepository = requestsRepository,
                 doctorsRepository = doctorsRepository,
                 clock = fixedClock,
+                connectivityObserver = connectivityObserver,
             )
     }
 
@@ -204,6 +208,35 @@ class HomeViewModelTest {
             val categories = viewModel.uiState.value.categories
             assertTrue(categories is HomeSectionState.Error)
             assertTrue((categories as HomeSectionState.Error).error is AppError.Network)
+        }
+
+    @Test
+    fun `a failed section recovers automatically when connectivity is restored, with no explicit retry`() =
+        runTest {
+            connectivityObserver.setConnected(false)
+            servicesRepository.errorToReturn = AppError.Network()
+            viewModel.onAction(HomeAction.Resumed)
+            assertTrue(viewModel.uiState.value.categories is HomeSectionState.Error)
+
+            servicesRepository.errorToReturn = null
+            servicesRepository.categories += aCategory()
+            connectivityObserver.setConnected(true)
+
+            assertTrue(viewModel.uiState.value.categories is HomeSectionState.Success)
+        }
+
+    @Test
+    fun `connectivity merely flapping while already connected does not re-trigger a successful section`() =
+        runTest {
+            servicesRepository.categories += aCategory()
+            viewModel.onAction(HomeAction.Resumed)
+            assertTrue(viewModel.uiState.value.categories is HomeSectionState.Success)
+
+            // Already connected at startup -- this is not a false-to-true
+            // edge, so it must not re-run anything that already succeeded.
+            connectivityObserver.setConnected(true)
+
+            assertTrue(viewModel.uiState.value.categories is HomeSectionState.Success)
         }
 
     @Test

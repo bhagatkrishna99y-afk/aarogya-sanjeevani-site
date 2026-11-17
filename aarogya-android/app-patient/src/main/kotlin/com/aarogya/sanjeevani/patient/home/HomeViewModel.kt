@@ -1,6 +1,7 @@
 package com.aarogya.sanjeevani.patient.home
 
 import androidx.lifecycle.viewModelScope
+import com.aarogya.sanjeevani.core.common.connectivity.ConnectivityObserver
 import com.aarogya.sanjeevani.core.common.result.AppResult
 import com.aarogya.sanjeevani.core.common.result.map
 import com.aarogya.sanjeevani.core.data.auth.AuthRepository
@@ -63,11 +64,30 @@ class HomeViewModel
         private val requestsRepository: RequestsRepository,
         private val doctorsRepository: DoctorsRepository,
         private val clock: Clock,
+        connectivityObserver: ConnectivityObserver,
     ) : BaseViewModel<HomeUiState, HomeUiEvent, HomeAction>(HomeUiState()) {
         /** "Good morning, Aanya" -- `null` when nothing's loaded yet
          *  (falls back to a name-less greeting in `HomeScreen.kt`). */
         val greetingPrefix: String
             get() = greetingPrefixFor(clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour)
+
+        init {
+            // A manual "Try again" tap right as connectivity returns can lose
+            // the race against the OS/network stack not being fully ready yet
+            // -- this gives every currently-failed section a second, unasked-for
+            // shot the moment connectivity is confirmed back, rather than
+            // leaving the user stuck until they navigate away and back (which
+            // only works because `Resumed` happens to fire then too).
+            viewModelScope.launch {
+                var wasConnected: Boolean? = null
+                connectivityObserver.isConnected.collect { isConnected ->
+                    if (wasConnected == false && isConnected) {
+                        retryFailedSections()
+                    }
+                    wasConnected = isConnected
+                }
+            }
+        }
 
         override fun onAction(action: HomeAction) {
             when (action) {
@@ -125,6 +145,12 @@ class HomeViewModel
                 setState { copy(doctors = HomeSectionState.Loading) }
                 loadDoctors()
             }
+        }
+
+        private fun retryFailedSections() {
+            if (currentState.categories is HomeSectionState.Error) retryCategories()
+            if (currentState.requests is HomeSectionState.Error) retryRequests()
+            if (currentState.doctors is HomeSectionState.Error) retryDoctors()
         }
 
         private suspend fun loadGreeting() {
