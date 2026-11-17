@@ -29,6 +29,21 @@ android {
             buildConfigField("String", "CONTACT_EMAIL", "\"${contactEmail("CONTACT_EMAIL_PROD")}\"")
         }
     }
+
+    // JUnit Jupiter (pulled in transitively by a testing dependency) ships
+    // its own META-INF/LICENSE*/NOTICE* in several of its own jars --
+    // harmless duplicate legal text, but mergeDevDebugAndroidTestJavaResource
+    // refuses to pick one on its own. Excluding the whole family rather than
+    // each exact filename one at a time (LICENSE.md, then LICENSE-notice.md,
+    // ...) -- standard practice for this well-known JUnit 5 packaging
+    // collision. Latent until :app-patient:connectedDevDebugAndroidTest was
+    // actually run for the first time this session.
+    packaging {
+        resources {
+            excludes += "META-INF/LICENSE*"
+            excludes += "META-INF/NOTICE*"
+        }
+    }
 }
 
 /**
