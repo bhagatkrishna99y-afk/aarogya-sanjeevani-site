@@ -100,6 +100,38 @@ class EditProfileViewModelTest {
             assertEquals("Jane Smith", viewModel.uiState.value.fullName)
         }
 
+    // -- Reload safety (rotation/config-change replay) ----------------------
+
+    @Test
+    fun `replaying Load after an edit -- the rotation case -- does not stomp the unsaved change`() =
+        runTest {
+            loaded(fullName = "Jane Doe")
+            viewModel.onAction(EditProfileAction.FullNameChanged("Jane Smith"))
+
+            // A config change recreates the Activity by default, replaying
+            // `EditProfileRoute`'s `LaunchedEffect(Unit)` -- and so this
+            // action -- even though this ViewModel instance itself survives.
+            viewModel.onAction(EditProfileAction.Load)
+
+            assertEquals("Jane Smith", viewModel.uiState.value.fullName)
+            assertTrue(viewModel.uiState.value.isDirty)
+        }
+
+    @Test
+    fun `Load still retries properly after a failed initial load`() =
+        runTest {
+            authRepository.signIn("patient@example.com", "password123")
+            profileRepository.errorToReturn = AppError.Network()
+            viewModel.onAction(EditProfileAction.Load)
+            assertTrue(viewModel.uiState.value.loadError is AppError.Network)
+
+            profileRepository.errorToReturn = null
+            viewModel.onAction(EditProfileAction.Load)
+
+            assertEquals(null, viewModel.uiState.value.loadError)
+            assertFalse(viewModel.uiState.value.isLoading)
+        }
+
     // -- Validation ---------------------------------------------------------
 
     @Test

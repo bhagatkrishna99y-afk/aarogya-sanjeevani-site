@@ -32,7 +32,19 @@ class EditProfileViewModel
             }
         }
 
+        /** A no-op once a profile has already loaded successfully --
+         *  [EditProfileAction.Load]'s own doc comment explains why a
+         *  resume-triggered reload isn't wired up, but a rotation (or any
+         *  other config change) recreates the Activity by default, which
+         *  replays `EditProfileRoute`'s `LaunchedEffect(Unit)` from
+         *  scratch even though this ViewModel instance itself survives --
+         *  without this guard, that replay would silently re-fetch and
+         *  stomp whatever the patient is mid-typing, the exact failure
+         *  mode the doc comment already guards against for a different
+         *  trigger. Re-running after a failed load (or the very first
+         *  call) is still allowed, since neither has real data to lose. */
         private fun load() {
+            if (!currentState.isLoading && currentState.loadError == null) return
             setState { copy(isLoading = true, loadError = null) }
             viewModelScope.launch {
                 val userId = authRepository.currentUserId()
