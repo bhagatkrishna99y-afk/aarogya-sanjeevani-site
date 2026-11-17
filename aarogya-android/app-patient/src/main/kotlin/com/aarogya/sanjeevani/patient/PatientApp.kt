@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -65,6 +67,15 @@ import com.aarogya.sanjeevani.patient.notifications.NotificationBadgeViewModel
  * full-bleed, the same adaptive treatment regardless of which screen is
  * showing -- applying it once here, rather than in every individual
  * screen, is what keeps that guarantee app-wide.
+ *
+ * [OfflineBanner] sits above every destination, including ones with no
+ * `Scaffold`/`TopAppBar` of their own (Home) -- so while it's visible it
+ * claims the status-bar padding itself and [Modifier.consumeWindowInsets]
+ * marks that same inset as spent for whatever renders below it, the same
+ * double-counting concern as [padding]/[innerPadding] above. Conditioning
+ * that `consumeWindowInsets` call on [isOffline] matters: when the banner
+ * isn't showing, every destination still needs the *real* inset for its
+ * own padding (Home's own, or a per-screen `TopAppBar`'s default).
  */
 @Composable
 fun PatientApp(
@@ -108,8 +119,17 @@ fun PatientApp(
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding),
         ) {
-            OfflineBanner(visible = isOffline)
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            OfflineBanner(
+                visible = isOffline,
+                modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+            )
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .let { if (isOffline) it.consumeWindowInsets(WindowInsets.statusBars) else it },
+                contentAlignment = Alignment.TopCenter,
+            ) {
                 val navHostModifier =
                     if (windowWidthSizeClass == WindowWidthSizeClass.Expanded) {
                         Modifier.fillMaxSize().widthIn(max = MAX_CONTENT_WIDTH)
