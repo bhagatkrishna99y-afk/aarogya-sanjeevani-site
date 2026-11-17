@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aarogya.sanjeevani.core.common.error.toUserMessage
-import com.aarogya.sanjeevani.core.data.auth.toUserMessage
 import com.aarogya.sanjeevani.core.designsystem.component.AsButton
 import com.aarogya.sanjeevani.core.designsystem.component.AsButtonVariant
 import com.aarogya.sanjeevani.core.designsystem.component.AsTextField
@@ -49,9 +48,12 @@ import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
  * [collectAsStateWithLifecycle] (never a plain `collectAsState`, so
  * collection pauses while the screen is stopped), collects
  * [LoginViewModel.uiEvent] once in a `LaunchedEffect(Unit)`, and is the
- * one place that resolves an [LoginUiEvent.ShowError]/[LoginUiEvent.ShowRejection]
- * to display text -- see those variants' doc comments for why that
- * resolution happens here and not in the ViewModel.
+ * one place that resolves an [LoginUiEvent.ShowError] to display text --
+ * see that variant's own doc comment for why that resolution happens
+ * here and not in the ViewModel. A wrong-role/suspended rejection is
+ * deliberately *not* one of these events -- see `PatientApp.kt`'s doc
+ * comment on why that message comes from a different, longer-lived
+ * channel instead.
  */
 @Composable
 fun LoginRoute(
@@ -70,8 +72,6 @@ fun LoginRoute(
                 LoginUiEvent.NavigateToSignUp -> onNavigateToSignUp()
                 LoginUiEvent.NavigateToForgotPassword -> onNavigateToForgotPassword()
                 is LoginUiEvent.ShowError -> snackbarHostState.showSnackbar(event.error.toUserMessage(context))
-                is LoginUiEvent.ShowRejection ->
-                    event.outcome.toUserMessage(context)?.let { snackbarHostState.showSnackbar(it) }
             }
         }
     }

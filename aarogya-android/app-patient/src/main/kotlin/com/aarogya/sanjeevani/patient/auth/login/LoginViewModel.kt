@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.aarogya.sanjeevani.core.common.result.AppResult
 import com.aarogya.sanjeevani.core.data.auth.AuthRepository
-import com.aarogya.sanjeevani.core.data.auth.PatientSignInResult
 import com.aarogya.sanjeevani.core.ui.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -64,12 +63,13 @@ class LoginViewModel
                     }
                     is AppResult.Success -> {
                         setState { copy(isSubmitting = false) }
-                        // Success: nothing to do here -- the global auth
-                        // gate reacts to AuthState flipping to
-                        // Authenticated and navigates on its own.
-                        if (result.data !is PatientSignInResult.Success) {
-                            sendEvent(LoginUiEvent.ShowRejection(result.data))
-                        }
+                        // Nothing further to do either way: a real success
+                        // is just an AuthState flip the global auth gate
+                        // reacts to on its own, and a wrong-role/suspended
+                        // rejection's message is shown from AuthRepository's
+                        // own signInRejections -- see PatientApp.kt's doc
+                        // comment on why this screen's own event channel
+                        // can't reliably deliver that one.
                     }
                 }
             }

@@ -14,6 +14,8 @@ import com.aarogya.sanjeevani.core.data.model.UserRole
 import com.aarogya.sanjeevani.core.data.profile.ProfileRepository
 import com.aarogya.sanjeevani.core.network.safeApiCall
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -24,6 +26,9 @@ class AuthRepositoryImpl
         private val profileRepository: ProfileRepository,
     ) : AuthRepository {
         override fun observeAuthState(): Flow<AuthState> = authGateway.sessionStatus.map { it.toAuthState() }
+
+        private val mutableSignInRejections = MutableSharedFlow<PatientSignInResult>(extraBufferCapacity = 1)
+        override val signInRejections: Flow<PatientSignInResult> = mutableSignInRejections.asSharedFlow()
 
         override fun currentUserId(): UserId? = authGateway.currentSessionOrNull()?.user?.id
 
@@ -68,10 +73,12 @@ class AuthRepositoryImpl
                             when {
                                 profile.isSuspended -> {
                                     runCatching { authGateway.signOut() }
+                                    mutableSignInRejections.tryEmit(PatientSignInResult.AccountSuspended)
                                     PatientSignInResult.AccountSuspended.asSuccess()
                                 }
                                 profile.role != UserRole.USER -> {
                                     runCatching { authGateway.signOut() }
+                                    mutableSignInRejections.tryEmit(PatientSignInResult.WrongRole(profile.role))
                                     PatientSignInResult.WrongRole(profile.role).asSuccess()
                                 }
                                 else -> PatientSignInResult.Success(userId).asSuccess()

@@ -192,4 +192,39 @@ class AuthRepositoryImplTest {
             assertEquals(PatientSignInResult.AccountSuspended, (result as AppResult.Success).data)
             assertNull(authGateway.currentSessionOrNull())
         }
+
+    // ---- signInRejections -------------------------------------------------
+
+    @Test
+    fun `a wrong-role sign-in also emits on signInRejections`() =
+        runTest {
+            profileRepository.profiles[FAKE_USER_ID] =
+                profileRepository.profiles.getValue(FAKE_USER_ID).copy(role = UserRole.DOCTOR)
+
+            repository.signInRejections.test {
+                repository.signInAsPatient("patient@example.com", "password123")
+                assertEquals(PatientSignInResult.WrongRole(UserRole.DOCTOR), awaitItem())
+            }
+        }
+
+    @Test
+    fun `a suspended account's sign-in also emits on signInRejections`() =
+        runTest {
+            profileRepository.profiles[FAKE_USER_ID] =
+                profileRepository.profiles.getValue(FAKE_USER_ID).copy(isSuspended = true)
+
+            repository.signInRejections.test {
+                repository.signInAsPatient("patient@example.com", "password123")
+                assertEquals(PatientSignInResult.AccountSuspended, awaitItem())
+            }
+        }
+
+    @Test
+    fun `a successful sign-in emits nothing on signInRejections`() =
+        runTest {
+            repository.signInRejections.test {
+                repository.signInAsPatient("patient@example.com", "password123")
+                expectNoEvents()
+            }
+        }
 }

@@ -13,10 +13,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -26,6 +28,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.aarogya.sanjeevani.core.data.auth.AuthState
+import com.aarogya.sanjeevani.core.data.auth.PatientSignInResult
+import com.aarogya.sanjeevani.core.data.auth.toUserMessage
 import com.aarogya.sanjeevani.core.designsystem.component.AsSnackbarHost
 import com.aarogya.sanjeevani.core.ui.connectivity.OfflineBanner
 import com.aarogya.sanjeevani.patient.auth.AuthGateViewModel
@@ -37,6 +41,8 @@ import com.aarogya.sanjeevani.patient.navigation.PatientNavHost
 import com.aarogya.sanjeevani.patient.navigation.Splash
 import com.aarogya.sanjeevani.patient.navigation.isInGraph
 import com.aarogya.sanjeevani.patient.notifications.NotificationBadgeViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 /**
  * The entire patient app, minus anything Hilt -- [navController],
@@ -76,6 +82,12 @@ import com.aarogya.sanjeevani.patient.notifications.NotificationBadgeViewModel
  * that `consumeWindowInsets` call on [isOffline] matters: when the banner
  * isn't showing, every destination still needs the *real* inset for its
  * own padding (Home's own, or a per-screen `TopAppBar`'s default).
+ *
+ * [signInRejections] is collected here, not from the login screen's own
+ * ViewModel -- see [com.aarogya.sanjeevani.core.data.auth.AuthRepository.signInRejections]'s
+ * doc comment for why a wrong-role/suspended sign-in's own event channel
+ * is unreliable (the auth gate's reaction to that same attempt tears the
+ * login screen down first).
  */
 @Composable
 fun PatientApp(
@@ -89,12 +101,14 @@ fun PatientApp(
     onAppPaused: () -> Unit = {},
     onRefreshUnreadCount: () -> Unit = {},
     windowWidthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
+    signInRejections: Flow<PatientSignInResult> = emptyFlow(),
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     AuthGateEffect(navController = navController, authState = authState)
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { onAppResumed() }
     LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) { onAppPaused() }
+    SignInRejectionSnackbarEffect(signInRejections, snackbarHostState)
 
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val showBottomBar = currentDestination.isInGraph<HomeGraph>()
@@ -150,6 +164,23 @@ fun PatientApp(
     }
 }
 
+/** Resolves and shows each [signInRejections] event on [snackbarHostState]
+ *  -- its own composable (rather than inline in [PatientApp]) only to
+ *  keep that function's own length down; see [PatientApp]'s doc comment
+ *  for why this lives at the app root instead of the login screen. */
+@Composable
+private fun SignInRejectionSnackbarEffect(
+    signInRejections: Flow<PatientSignInResult>,
+    snackbarHostState: SnackbarHostState,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        signInRejections.collect { rejection ->
+            rejection.toUserMessage(context)?.let { snackbarHostState.showSnackbar(it) }
+        }
+    }
+}
+
 /** A tablet-width screen keeps every form/list readable rather than
  *  letting a single Column of text stretch edge-to-edge -- the same
  *  reasoning most single-pane adaptive layouts use for a "reading
@@ -183,5 +214,6 @@ fun PatientAppRoot(windowWidthSizeClass: WindowWidthSizeClass) {
         onAppPaused = notificationBadgeViewModel::pause,
         onRefreshUnreadCount = notificationBadgeViewModel::refresh,
         windowWidthSizeClass = windowWidthSizeClass,
+        signInRejections = authGateViewModel.signInRejections,
     )
 }

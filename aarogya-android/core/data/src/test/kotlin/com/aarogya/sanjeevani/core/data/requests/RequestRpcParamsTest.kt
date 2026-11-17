@@ -47,7 +47,8 @@ class RequestRpcParamsTest {
 
     @Test
     fun `transition_request_status params keep p_reason even when null`() {
-        val params = TransitionRequestStatusParams(requestId = "request-1", newStatus = RequestStatus.CANCELLED, reason = null)
+        val params =
+            TransitionRequestStatusParams(requestId = "request-1", newStatus = RequestStatus.CANCELLED, reason = null)
 
         val json = rpcParams(TransitionRequestStatusParams.serializer(), params)
 

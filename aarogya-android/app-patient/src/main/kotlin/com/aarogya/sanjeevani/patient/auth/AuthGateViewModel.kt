@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aarogya.sanjeevani.core.data.auth.AuthRepository
 import com.aarogya.sanjeevani.core.data.auth.AuthState
+import com.aarogya.sanjeevani.core.data.auth.PatientSignInResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -35,6 +37,13 @@ class AuthGateViewModel
             authRepository
                 .observeAuthState()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), AuthState.Loading)
+
+        /** See [AuthRepository.signInRejections]'s own doc comment --
+         *  exposed here, not from `LoginViewModel`, for exactly that
+         *  reason: this ViewModel is Activity-scoped and survives the
+         *  back-stack reset that would otherwise take the message with
+         *  it. */
+        val signInRejections: Flow<PatientSignInResult> = authRepository.signInRejections
 
         /** Guards against a double-tap on the confirm button of the
          *  logout dialog firing [AuthRepository.signOut] twice before the

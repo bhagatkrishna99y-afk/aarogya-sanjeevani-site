@@ -29,6 +29,22 @@ interface AuthRepository {
      *  an unrecoverable token-refresh failure all surface here. */
     fun observeAuthState(): Flow<AuthState>
 
+    /**
+     * One-off events, each for a [signInAsPatient] call this session that
+     * came back as something other than [PatientSignInResult.Success] --
+     * the app's long-lived, Activity-scoped auth-gate ViewModel should
+     * collect this, not a per-screen login ViewModel, because
+     * [signInAsPatient]'s internal sign-out makes [observeAuthState] flip
+     * Authenticated-then-Unauthenticated-again as a side effect, and an
+     * app-wide auth gate reacting to that transient Authenticated state
+     * typically resets the whole nav back stack -- tearing down the login
+     * screen (and whatever event channel lives only as long as it does)
+     * before it could ever show this message otherwise. A plain hot
+     * [Flow], not part of [AuthState]: nothing here should make the auth
+     * gate itself navigate anywhere a second time.
+     */
+    val signInRejections: Flow<PatientSignInResult>
+
     /** A live/local read (not a network call) -- `null` while signed out. */
     fun currentUserId(): UserId?
 

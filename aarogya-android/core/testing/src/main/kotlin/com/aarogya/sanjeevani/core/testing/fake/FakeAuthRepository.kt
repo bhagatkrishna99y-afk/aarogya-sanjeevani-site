@@ -9,7 +9,10 @@ import com.aarogya.sanjeevani.core.data.auth.AuthState
 import com.aarogya.sanjeevani.core.data.auth.PatientSignInResult
 import com.aarogya.sanjeevani.core.data.auth.SignUpOutcome
 import com.aarogya.sanjeevani.core.data.auth.UserId
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 /** In-memory [AuthRepository] -- set [errorToReturn] before calling a
  *  method to make that call fail instead; otherwise sign-up/sign-in
@@ -30,6 +33,9 @@ class FakeAuthRepository : AuthRepository {
     var signUpOutcome: SignUpOutcome = SignUpOutcome.SignedIn(FAKE_USER_ID)
 
     override fun observeAuthState() = authStateFlow
+
+    private val mutableSignInRejections = MutableSharedFlow<PatientSignInResult>(extraBufferCapacity = 1)
+    override val signInRejections: Flow<PatientSignInResult> = mutableSignInRejections.asSharedFlow()
 
     override fun currentUserId(): UserId? = (authStateFlow.value as? AuthState.Authenticated)?.userId
 
@@ -61,6 +67,8 @@ class FakeAuthRepository : AuthRepository {
         errorToReturn?.let { return it.asError() }
         if (patientSignInResult is PatientSignInResult.Success) {
             authStateFlow.value = AuthState.Authenticated(FAKE_USER_ID)
+        } else {
+            mutableSignInRejections.tryEmit(patientSignInResult)
         }
         return patientSignInResult.asSuccess()
     }

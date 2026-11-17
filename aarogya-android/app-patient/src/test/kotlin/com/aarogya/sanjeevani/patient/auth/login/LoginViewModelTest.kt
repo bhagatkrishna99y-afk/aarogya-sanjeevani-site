@@ -62,19 +62,22 @@ class LoginViewModelTest {
         }
 
     @Test
-    fun `a wrong-role account is reported as a rejection, not a Failure, and is signed back out`() =
+    fun `a wrong-role account resets submitting and sends no event of its own`() =
         runTest {
             authRepository.patientSignInResult = PatientSignInResult.WrongRole(UserRole.DOCTOR)
             viewModel.onAction(LoginAction.EmailChanged("doctor@example.com"))
             viewModel.onAction(LoginAction.PasswordChanged("password123"))
 
+            // Not a ShowRejection event from this ViewModel -- the auth
+            // gate's reaction to this same sign-in attempt would tear this
+            // screen down before any event it sent could be collected. See
+            // AuthRepositoryImplTest's own coverage of signInRejections,
+            // the channel that message actually comes from.
             viewModel.uiEvent.test {
                 viewModel.onAction(LoginAction.SubmitClicked)
-                val event = awaitItem()
-                assertTrue(event is LoginUiEvent.ShowRejection)
-                val outcome = (event as LoginUiEvent.ShowRejection).outcome
-                assertEquals(PatientSignInResult.WrongRole(UserRole.DOCTOR), outcome)
+                expectNoEvents()
             }
+            assertFalse(viewModel.uiState.value.isSubmitting)
         }
 
     @Test
