@@ -3,9 +3,12 @@ package com.aarogya.sanjeevani.patient.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
@@ -122,11 +125,16 @@ internal fun HomeScreen(
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
 
+    // Every other screen gets its status-bar padding for free from
+    // Scaffold's TopAppBar (see `PatientApp.kt`'s doc comment on why the
+    // app-wide Scaffold itself zeroes/consumes insets instead). Home has
+    // no TopAppBar -- its greeting header is the first LazyColumn item --
+    // so without this, the header renders underneath the status bar.
     PullToRefreshBox(
         isRefreshing = uiState.isRefreshing,
         onRefresh = { onAction(HomeAction.Refresh) },
         state = pullToRefreshState,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars),
     ) {
         HomeContent(
             uiState = uiState,
