@@ -148,7 +148,10 @@ private fun RequestFormContent(
             )
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(AsTheme.spacing.sm)) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AsTheme.spacing.sm),
+            modifier = Modifier.selectableGroup(),
+        ) {
             Text(text = "Service mode", style = MaterialTheme.typography.titleSmall)
             availableModes.forEach { mode ->
                 ModeCard(
@@ -297,8 +300,14 @@ private fun ModeCard(
     onClick: () -> Unit,
 ) {
     Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .selectable(selected = selected, onClick = onClick, role = Role.RadioButton)
+                .semantics {
+                    contentDescription = mode.label()
+                    stateDescription = if (selected) "Selected" else "Not selected"
+                },
         color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         contentColor =
             if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -311,7 +320,7 @@ private fun ModeCard(
             Icon(imageVector = mode.icon(), contentDescription = null)
             Text(text = mode.label(), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
             if (selected) {
-                Icon(imageVector = Icons.Filled.Check, contentDescription = "Selected", modifier = Modifier.size(20.dp))
+                Icon(imageVector = Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(20.dp))
             }
         }
     }
