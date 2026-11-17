@@ -24,6 +24,7 @@ import com.aarogya.sanjeevani.core.testing.fake.FakeProfileRepository
 import com.aarogya.sanjeevani.core.testing.fake.FakeRequestsRepository
 import com.aarogya.sanjeevani.core.testing.fake.FakeServicesRepository
 import com.aarogya.sanjeevani.patient.navigation.RequestForm
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -35,6 +36,10 @@ private const val SERVICE_ID = "svc-1"
 private const val DOCTOR_ID = "doc-1"
 private val SOME_INSTANT = Instant.parse("2026-01-01T00:00:00Z")
 private val SLOT_START = Instant.parse("2026-01-05T03:30:00Z")
+private val FIXED_CLOCK =
+    object : Clock {
+        override fun now() = SOME_INSTANT
+    }
 
 /**
  * The full happy path end to end -- the real [RequestFormViewModel]
@@ -67,6 +72,7 @@ class RequestFormFlowTest {
                 profileRepository = FakeProfileRepository(),
                 requestsRepository = requestsRepository,
                 savedStateHandle = SavedStateHandle(),
+                clock = FIXED_CLOCK,
                 route =
                     RequestForm(
                         serviceId = SERVICE_ID,
