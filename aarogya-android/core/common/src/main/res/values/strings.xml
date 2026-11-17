@@ -62,4 +62,6 @@
     <string name="error_auth_invalid_credentials">Incorrect email or password.</string>
     <string name="error_auth_email_not_confirmed">Please confirm your email address before signing in — check your inbox for the link we sent you.</string>
     <string name="error_auth_email_already_in_use">An account with this email already exists. Try logging in instead.</string>
+    <string name="error_auth_invalid_email_address">That email address doesn\'t look right. Please double-check it and try again.</string>
+    <string name="error_auth_email_send_rate_limited">Too many emails sent recently. Please wait a few minutes and try again.</string>
 </resources>

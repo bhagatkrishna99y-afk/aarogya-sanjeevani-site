@@ -3,6 +3,7 @@ package com.aarogya.sanjeevani.core.data.requests
 import com.aarogya.sanjeevani.core.common.result.AppResult
 import com.aarogya.sanjeevani.core.common.result.map
 import com.aarogya.sanjeevani.core.data.model.RequestStatus
+import com.aarogya.sanjeevani.core.network.rpcParams
 import com.aarogya.sanjeevani.core.network.safeApiCall
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
@@ -40,7 +41,10 @@ class RequestsRepositoryImpl
             // the same slot if the first attempt actually succeeded server-side.
             safeApiCall {
                 client.postgrest
-                    .rpc("create_service_request", request.toParams())
+                    .rpc(
+                        "create_service_request",
+                        rpcParams(CreateServiceRequestParams.serializer(), request.toParams()),
+                    )
                     .decodeAs<String>()
             }
 
@@ -52,7 +56,10 @@ class RequestsRepositoryImpl
             safeApiCall {
                 client.postgrest.rpc(
                     "transition_request_status",
-                    TransitionRequestStatusParams(requestId = requestId, newStatus = newStatus, reason = reason),
+                    rpcParams(
+                        TransitionRequestStatusParams.serializer(),
+                        TransitionRequestStatusParams(requestId = requestId, newStatus = newStatus, reason = reason),
+                    ),
                 )
                 Unit
             }

@@ -2,7 +2,9 @@ package com.aarogya.sanjeevani.core.data.auth
 
 import app.cash.turbine.test
 import com.aarogya.sanjeevani.core.common.error.AUTH_EMAIL_NOT_CONFIRMED_CODE
+import com.aarogya.sanjeevani.core.common.error.AUTH_EMAIL_SEND_RATE_LIMITED_CODE
 import com.aarogya.sanjeevani.core.common.error.AUTH_INVALID_CREDENTIALS_CODE
+import com.aarogya.sanjeevani.core.common.error.AUTH_INVALID_EMAIL_ADDRESS_CODE
 import com.aarogya.sanjeevani.core.common.error.AppError
 import com.aarogya.sanjeevani.core.common.result.AppResult
 import com.aarogya.sanjeevani.core.data.model.UserRole
@@ -53,6 +55,32 @@ class AuthRepositoryImplTest {
             assertTrue(result is AppResult.Success)
             val outcome = (result as AppResult.Success).data
             assertEquals(SignUpOutcome.PendingEmailConfirmation, outcome)
+        }
+
+    @Test
+    fun `sign-up maps an invalid email address to a Business error with the auth code`() =
+        runTest {
+            authGateway.signUpError = AuthGatewayException.InvalidEmailAddress()
+
+            val result = repository.signUpPatient("Jane Doe", "jane@example.test", "password123")
+
+            assertTrue(result is AppResult.Failure)
+            val error = (result as AppResult.Failure).error
+            assertTrue(error is AppError.Business)
+            assertEquals(AUTH_INVALID_EMAIL_ADDRESS_CODE, (error as AppError.Business).code)
+        }
+
+    @Test
+    fun `sign-up maps an email send rate limit to a Business error with the auth code`() =
+        runTest {
+            authGateway.signUpError = AuthGatewayException.EmailSendRateLimited()
+
+            val result = repository.signUpPatient("Jane Doe", "jane@example.com", "password123")
+
+            assertTrue(result is AppResult.Failure)
+            val error = (result as AppResult.Failure).error
+            assertTrue(error is AppError.Business)
+            assertEquals(AUTH_EMAIL_SEND_RATE_LIMITED_CODE, (error as AppError.Business).code)
         }
 
     // ---- sign-in failure mapping --------------------------------------

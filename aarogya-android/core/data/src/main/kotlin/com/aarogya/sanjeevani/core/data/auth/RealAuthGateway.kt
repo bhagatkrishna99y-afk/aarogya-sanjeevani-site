@@ -32,11 +32,18 @@ class RealAuthGateway
                     this.data = buildJsonObject { metadata.forEach { (key, value) -> put(key, value) } }
                 }
             } catch (e: AuthRestException) {
-                throw when (e.errorCode) {
+                throw when {
                     // GoTrue has used both codes for "this email is already
                     // registered" across versions -- map either.
-                    AuthErrorCode.EmailExists, AuthErrorCode.UserAlreadyExists ->
+                    e.errorCode == AuthErrorCode.EmailExists || e.errorCode == AuthErrorCode.UserAlreadyExists ->
                         AuthGatewayException.EmailAlreadyInUse(e)
+                    // Neither of these has an AuthErrorCode entry in
+                    // supabase-kt 3.0.3 -- match GoTrue's raw `error` code
+                    // string directly (confirmed via a real signup call;
+                    // never log `e.description`/`e.message` for these,
+                    // GoTrue echoes the submitted email address in them).
+                    e.error == "email_address_invalid" -> AuthGatewayException.InvalidEmailAddress(e)
+                    e.error == "over_email_send_rate_limit" -> AuthGatewayException.EmailSendRateLimited(e)
                     else -> e
                 }
             }

@@ -18,4 +18,17 @@ sealed class AuthGatewayException(message: String, cause: Throwable? = null) : E
 
     class EmailAlreadyInUse(cause: Throwable? = null) :
         AuthGatewayException("An account with this email already exists", cause)
+
+    /** GoTrue's `email_address_invalid` -- not deliverable/well-formed
+     *  enough for this project's Auth settings (e.g. a non-resolvable
+     *  domain). Not in supabase-kt 3.0.3's own `AuthErrorCode` enum, so
+     *  [RealAuthGateway] matches the raw `error` string, not the enum. */
+    class InvalidEmailAddress(cause: Throwable? = null) :
+        AuthGatewayException("That email address isn't valid", cause)
+
+    /** GoTrue's `over_email_send_rate_limit` -- the account itself would
+     *  be fine, but this project's email provider has a send-rate cap
+     *  and it's been hit (confirmation/reset emails share one budget). */
+    class EmailSendRateLimited(cause: Throwable? = null) :
+        AuthGatewayException("Too many emails sent recently", cause)
 }

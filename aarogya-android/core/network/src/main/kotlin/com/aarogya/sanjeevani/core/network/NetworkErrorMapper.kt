@@ -7,6 +7,7 @@ import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import kotlinx.serialization.SerializationException
+import timber.log.Timber
 import java.io.IOException
 
 /**
@@ -104,11 +105,23 @@ internal fun Throwable.toAppError(): AppError {
             ?: if (this is UnauthorizedRestException) {
                 AppError.Unauthorized(cause = this)
             } else {
+                // Debug builds only (Timber.DebugTree vs. release's
+                // CrashReportingTree, see AarogyaPatientApplication) --
+                // `error` is always the short stable code (PGRST202,
+                // email_address_invalid, an AS0xx text with no
+                // interpolated user data), never `description`/`message`,
+                // which for some Auth errors echoes the submitted email.
+                Timber.e(this, "Unmapped backend error (status=%d): %s", statusCode, error)
                 AppError.Unknown(cause = this)
             }
     }
     return when (this) {
-        is SerializationException -> AppError.Unknown(cause = this)
+        is SerializationException -> {
+            // Safe to log in full: a decode/encode shape mismatch, never
+            // user-entered data.
+            Timber.e(this, "Serialization error")
+            AppError.Unknown(cause = this)
+        }
         // Ktor's own request/connect/socket timeouts -- plain IOException
         // subtypes (not CancellationException, verified against Ktor's
         // source), so they land here rather than in safeApiCall's
@@ -118,6 +131,9 @@ internal fun Throwable.toAppError(): AppError {
         is HttpRequestTimeoutException, is ConnectTimeoutException, is SocketTimeoutException ->
             AppError.Network(isTimeout = true, cause = this)
         is IOException -> AppError.Network(cause = this)
-        else -> AppError.Unknown(cause = this)
+        else -> {
+            Timber.e(this, "Unrecognized error mapped to AppError.Unknown")
+            AppError.Unknown(cause = this)
+        }
     }
 }

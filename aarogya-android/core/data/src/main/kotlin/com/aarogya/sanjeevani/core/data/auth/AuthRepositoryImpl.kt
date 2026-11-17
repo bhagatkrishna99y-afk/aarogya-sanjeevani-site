@@ -2,7 +2,9 @@ package com.aarogya.sanjeevani.core.data.auth
 
 import com.aarogya.sanjeevani.core.common.error.AUTH_EMAIL_ALREADY_IN_USE_CODE
 import com.aarogya.sanjeevani.core.common.error.AUTH_EMAIL_NOT_CONFIRMED_CODE
+import com.aarogya.sanjeevani.core.common.error.AUTH_EMAIL_SEND_RATE_LIMITED_CODE
 import com.aarogya.sanjeevani.core.common.error.AUTH_INVALID_CREDENTIALS_CODE
+import com.aarogya.sanjeevani.core.common.error.AUTH_INVALID_EMAIL_ADDRESS_CODE
 import com.aarogya.sanjeevani.core.common.error.AppError
 import com.aarogya.sanjeevani.core.common.result.AppResult
 import com.aarogya.sanjeevani.core.common.result.asError
@@ -108,6 +110,8 @@ class AuthRepositoryImpl
                     is AuthGatewayException.InvalidCredentials -> AUTH_INVALID_CREDENTIALS_CODE
                     is AuthGatewayException.EmailNotConfirmed -> AUTH_EMAIL_NOT_CONFIRMED_CODE
                     is AuthGatewayException.EmailAlreadyInUse -> AUTH_EMAIL_ALREADY_IN_USE_CODE
+                    is AuthGatewayException.InvalidEmailAddress -> AUTH_INVALID_EMAIL_ADDRESS_CODE
+                    is AuthGatewayException.EmailSendRateLimited -> AUTH_EMAIL_SEND_RATE_LIMITED_CODE
                     else -> null
                 }
             return if (code == null) {

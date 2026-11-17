@@ -19,6 +19,14 @@ const val AUTH_EMAIL_NOT_CONFIRMED_CODE = "AUTH_EMAIL_NOT_CONFIRMED"
  *  note as [AUTH_INVALID_CREDENTIALS_CODE]. */
 const val AUTH_EMAIL_ALREADY_IN_USE_CODE = "AUTH_EMAIL_ALREADY_IN_USE"
 
+/** Supabase Auth's `email_address_invalid` code -- same note as
+ *  [AUTH_INVALID_CREDENTIALS_CODE]. */
+const val AUTH_INVALID_EMAIL_ADDRESS_CODE = "AUTH_INVALID_EMAIL_ADDRESS"
+
+/** Supabase Auth's `over_email_send_rate_limit` code -- same note as
+ *  [AUTH_INVALID_CREDENTIALS_CODE]. */
+const val AUTH_EMAIL_SEND_RATE_LIMITED_CODE = "AUTH_EMAIL_SEND_RATE_LIMITED"
+
 /**
  * Every backend business code this app knows how to put a friendly face
  * on, straight from backend/docs/error-codes.md, plus the two Supabase
@@ -70,6 +78,8 @@ private val AS_CODE_STRINGS: Map<String, Int> =
         AUTH_INVALID_CREDENTIALS_CODE to R.string.error_auth_invalid_credentials,
         AUTH_EMAIL_NOT_CONFIRMED_CODE to R.string.error_auth_email_not_confirmed,
         AUTH_EMAIL_ALREADY_IN_USE_CODE to R.string.error_auth_email_already_in_use,
+        AUTH_INVALID_EMAIL_ADDRESS_CODE to R.string.error_auth_invalid_email_address,
+        AUTH_EMAIL_SEND_RATE_LIMITED_CODE to R.string.error_auth_email_send_rate_limited,
     )
 
 internal fun resourceForCode(code: String): Int? = AS_CODE_STRINGS[code]
