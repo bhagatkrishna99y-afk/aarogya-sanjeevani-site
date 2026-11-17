@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Explicit, rather than relying on the platform default: targeting API 28+
+  already blocks cleartext HTTP for this app with no config at all, but
+  that default is implicit and one targetSdk/minSdk change away from
+  silently changing. This is the auditable version of the same rule,
+  one that keeps working even if that default ever shifts. No
+  domain-config overrides: every real request this app makes is to
+  Supabase's own HTTPS endpoint (BuildConfig.SUPABASE_URL), so a single
+  base-config covers it.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

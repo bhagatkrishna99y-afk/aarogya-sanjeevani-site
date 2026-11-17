@@ -1,0 +1,95 @@
+package com.aarogya.sanjeevani.core.designsystem.component
+
+import android.content.res.Configuration
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
+
+/** A person's circular avatar: [imageUrl] when there is one and it loads,
+ *  initials from [name] otherwise -- the fallback is never a generic
+ *  person glyph, since initials still tell a patient/doctor list rows
+ *  apart from each other at a glance. */
+@Composable
+fun AsAvatar(
+    name: String,
+    modifier: Modifier = Modifier,
+    imageUrl: String? = null,
+    size: Dp = 40.dp,
+) {
+    var loadFailed by remember(imageUrl) { mutableStateOf(false) }
+    val showImage = imageUrl != null && !loadFailed
+
+    Box(
+        modifier =
+            modifier
+                .size(size)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .clearAndSetSemantics { contentDescription = name },
+        contentAlignment = Alignment.Center,
+    ) {
+        if (showImage) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                modifier = Modifier.size(size).clip(CircleShape),
+                contentScale = ContentScale.Crop,
+                onError = { loadFailed = true },
+            )
+        } else {
+            Text(
+                text = initialsOf(name),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.titleMedium,
+                fontSize = (size.value / 2.2).sp,
+            )
+        }
+    }
+}
+
+private fun initialsOf(name: String): String =
+    name
+        .trim()
+        .split(Regex("\\s+"))
+        .filter { it.isNotEmpty() }
+        .take(2)
+        .joinToString(separator = "") { it.first().uppercaseChar().toString() }
+        .ifEmpty { "?" }
+
+@Preview(name = "Avatar - light")
+@Preview(name = "Avatar - dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun AsAvatarPreview() {
+    AarogyaTheme {
+        Surface {
+            Row(modifier = Modifier.padding(16.dp)) {
+                AsAvatar(name = "Asha Rao")
+                AsAvatar(name = "Jane Doe", size = 56.dp, modifier = Modifier.padding(start = 12.dp))
+                AsAvatar(name = "X", modifier = Modifier.padding(start = 12.dp))
+            }
+        }
+    }
+}

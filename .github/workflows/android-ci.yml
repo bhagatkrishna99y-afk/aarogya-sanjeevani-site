@@ -1,0 +1,50 @@
+name: Android CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "aarogya-android/**"
+      - ".github/workflows/android-ci.yml"
+  pull_request:
+    paths:
+      - "aarogya-android/**"
+      - ".github/workflows/android-ci.yml"
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aarogya-android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: ktlint
+        run: ./gradlew ktlintCheck
+
+      - name: detekt
+        run: ./gradlew detekt
+
+      - name: Unit tests
+        run: ./gradlew test
+
+      # No real Supabase project backs CI, and assembling the debug build
+      # type doesn't need one -- these are throwaway values that only have
+      # to be non-null strings for BuildConfig to generate. Real secrets
+      # are a developer's/CI release job's own local.properties, never
+      # committed (see local.properties.example).
+      - name: Assemble debug (both apps, dev flavor)
+        run: |
+          ./gradlew :app-patient:assembleDevDebug :app-doctor:assembleDevDebug \
+            -PSUPABASE_URL_DEV=https://ci-placeholder.supabase.co \
+            -PSUPABASE_ANON_KEY_DEV=ci-placeholder-anon-key \
+            -PSUPABASE_URL_PROD=https://ci-placeholder.supabase.co \
+            -PSUPABASE_ANON_KEY_PROD=ci-placeholder-anon-key

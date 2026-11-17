@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A heart with a medical cross cut out of its center: the same two
+  motifs (heart + cross) the real Aarogya Sanjeevani logo already uses
+  (website/src/assets/logo.png), simplified to one bold silhouette since
+  an adaptive icon's foreground has to still read clearly at launcher-icon
+  sizes, which that full illustration (stethoscope, ambulance, wordmark)
+  never would. Drawn as one compound path with fillType="evenOdd" so the
+  cross is a true geometric cutout: this renders correctly in every
+  context the OS puts it in (full color on the teal background, a single
+  tint color for the Android 13+ monochrome/themed variant, a shrunk
+  preview in app info), not just the one case a color-matching trick
+  would have covered.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M54,78 C54,78 26,56 26,38 C26,26 36,20 46,24 C50,26 54,30 54,35 C54,30 58,26 62,24 C72,20 82,26 82,38 C82,56 54,78 54,78 Z M49,40 L59,40 L59,64 L49,64 Z M41,47 L67,47 L67,57 L41,57 Z" />
+</vector>

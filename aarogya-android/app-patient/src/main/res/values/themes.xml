@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Content is all Compose; this only needs to exist so the Activity
+         has a window background before the first frame draws. -->
+    <style name="Theme.AarogyaPatient" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- MainActivity's actual launch theme (see AndroidManifest.xml):
+         androidx.core.splashscreen draws this system splash screen on
+         every supported API level (not just 12+, which is all
+         SplashScreen is natively available on) until
+         MainActivity.onCreate calls installSplashScreen() and that
+         screen's own keep-on-screen condition clears, then switches to
+         postSplashScreenTheme for the rest of the Activity's life. Reuses
+         the same teal background and heart+cross glyph as the launcher
+         icon rather than introducing a third piece of brand artwork. -->
+    <style name="Theme.AarogyaPatient.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.AarogyaPatient</item>
+    </style>
+</resources>

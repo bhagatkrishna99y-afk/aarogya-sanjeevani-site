@@ -1,0 +1,37 @@
+# Copy this file to local.properties (same directory) and fill in real
+# values. local.properties is gitignored -- never commit real secrets or
+# your real SDK path.
+
+# Usually written automatically by Android Studio on first sync; set it
+# by hand if you're building from the command line on a fresh checkout.
+sdk.dir=/path/to/Android/sdk
+
+# Read by build-logic's buildConfigField wiring (see app-patient/build.gradle.kts
+# and app-doctor/build.gradle.kts) into BuildConfig.SUPABASE_URL /
+# BuildConfig.SUPABASE_ANON_KEY. The anon key is safe to ship in a built
+# APK (it's the public, RLS-constrained key) but should still never be
+# committed to source control as a matter of hygiene -- rotate it the
+# same as any other credential if it ever leaks.
+#
+# One pair per flavor. The "dev" flavor is meant to point at a separate
+# Supabase project (or the same project's staging schema) from "prod".
+SUPABASE_URL_DEV=https://your-dev-project.supabase.co
+SUPABASE_ANON_KEY_DEV=your-dev-anon-key
+
+SUPABASE_URL_PROD=https://your-prod-project.supabase.co
+SUPABASE_ANON_KEY_PROD=your-prod-anon-key
+
+# Read by app-patient/build.gradle.kts into BuildConfig.WEBSITE_BASE_URL --
+# where the Welcome screen's Privacy Policy link (opened in a Custom Tab)
+# points. The marketing website (../website) has no registered production
+# domain yet, so there's no real default to ship here; point WEBSITE_BASE_URL_DEV
+# at wherever you're running the website locally/in preview while that's
+# still true.
+WEBSITE_BASE_URL_DEV=https://your-dev-website-url.example
+WEBSITE_BASE_URL_PROD=https://your-prod-website-url.example
+
+# Read by app-patient/build.gradle.kts into BuildConfig.CONTACT_EMAIL --
+# where the Profile screen's "Contact support" and "Request account
+# deletion" mailto: links point.
+CONTACT_EMAIL_DEV=support@example.com
+CONTACT_EMAIL_PROD=support@example.com

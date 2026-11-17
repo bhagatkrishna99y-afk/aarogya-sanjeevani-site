@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The launcher icon's background: Brand40 from
+         core/designsystem/theme/Color.kt (teal-700, this app's "text-safe
+         main" brand teal), duplicated here as a plain resource rather than
+         a Compose Color since the adaptive icon is rendered by the OS,
+         outside of Compose entirely, before any theme/dark-mode logic
+         this app owns ever runs. Kept identical across light and dark,
+         deliberately: a system launcher's own icon tray already provides
+         whatever light/dark surface the icon sits on, so this shouldn't
+         also try to invert itself. -->
+    <color name="ic_launcher_background">#0F766E</color>
+</resources>

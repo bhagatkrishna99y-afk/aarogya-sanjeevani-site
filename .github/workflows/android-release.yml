@@ -1,0 +1,57 @@
+name: Android Release
+
+# Fires only on a version tag for the patient app, e.g. patient-v1.0.0-rc1 --
+# never on every push to main the way android-ci.yml's checks are, since this
+# job actually produces a signed artifact meant to be uploaded somewhere.
+on:
+  push:
+    tags:
+      - "patient-v*"
+
+jobs:
+  release-bundle:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aarogya-android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # The real production signing key lives only as an encrypted repo
+      # secret (base64-encoded .jks), decoded to a gitignored-equivalent
+      # runner-local temp file for the one build step that needs it, then
+      # never written anywhere this workflow doesn't immediately tear
+      # down with the runner itself. See AndroidApplicationConventionPlugin.kt's
+      # loadSigningConfig for the four SIGNING_* env vars this sets.
+      - name: Decode signing key
+        env:
+          PATIENT_KEYSTORE_BASE64: ${{ secrets.PATIENT_KEYSTORE_BASE64 }}
+        run: |
+          echo "$PATIENT_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/patient-release.jks"
+
+      - name: Build signed App Bundle (prod release)
+        env:
+          SIGNING_STORE_FILE: ${{ runner.temp }}/patient-release.jks
+          SIGNING_STORE_PASSWORD: ${{ secrets.PATIENT_KEYSTORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.PATIENT_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.PATIENT_KEY_PASSWORD }}
+        run: |
+          ./gradlew :app-patient:bundleProdRelease \
+            -PSUPABASE_URL_PROD="${{ secrets.SUPABASE_URL_PROD }}" \
+            -PSUPABASE_ANON_KEY_PROD="${{ secrets.SUPABASE_ANON_KEY_PROD }}" \
+            -PWEBSITE_BASE_URL_PROD="${{ secrets.WEBSITE_BASE_URL_PROD }}" \
+            -PCONTACT_EMAIL_PROD="${{ secrets.CONTACT_EMAIL_PROD }}"
+
+      - name: Upload signed App Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: patient-release-bundle-${{ github.ref_name }}
+          path: aarogya-android/app-patient/build/outputs/bundle/prodRelease/app-patient-prod-release.aab
+          if-no-files-found: error

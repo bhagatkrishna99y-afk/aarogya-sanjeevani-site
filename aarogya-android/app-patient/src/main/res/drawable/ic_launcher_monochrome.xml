@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 13+ themed-icon variant: the OS recolors whatever this draws
+  to match the device's wallpaper-derived palette, discarding any color
+  info, so this is the same heart+cross glyph as ic_launcher_foreground
+  with no background layer at all (the themed-icon system draws its own
+  background shape behind it).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M54,78 C54,78 26,56 26,38 C26,26 36,20 46,24 C50,26 54,30 54,35 C54,30 58,26 62,24 C72,20 82,26 82,38 C82,56 54,78 54,78 Z M49,40 L59,40 L59,64 L49,64 Z M41,47 L67,47 L67,57 L41,57 Z" />
+</vector>

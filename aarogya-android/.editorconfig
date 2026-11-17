@@ -1,0 +1,7 @@
+root = true
+
+[*.{kt,kts}]
+# Same reasoning as config/detekt/detekt.yml's FunctionNaming override: a
+# @Composable function is a UI element, named PascalCase like a type by
+# Compose convention -- not a naming violation for ktlint to flag either.
+ktlint_function_naming_ignore_when_annotated_with = Composable

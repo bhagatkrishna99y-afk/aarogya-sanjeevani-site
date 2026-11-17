@@ -1,0 +1,38 @@
+# Secrets -- never commit the real file, only local.properties.example
+local.properties
+
+# Signing -- never commit a real keystore or its credentials, only
+# keystore.properties.example. CI reads its own copy from encrypted
+# GitHub Actions secrets instead (see .github/workflows/release.yml).
+keystore.properties
+*.jks
+*.keystore
+
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.navigation/
+captures/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Compose compiler diagnostics (opt-in, see gradle.properties)
+compose_metrics/
+compose_reports/
+
+# Local config that varies per machine
+.kotlin/
+local.env
+
+# OS
+.DS_Store
+Thumbs.db

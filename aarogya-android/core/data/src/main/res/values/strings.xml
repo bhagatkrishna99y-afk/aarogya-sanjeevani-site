@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  User-facing text specific to this module's auth/signup flow, resolved
+  by AuthMessages.kt. Kept separate from :core:common's strings.xml,
+  which is scoped to the generic AppError registry; these are specific
+  to the patient-app signup/sign-in UX, not a general failure category.
+-->
+<resources>
+    <string name="signup_error_full_name_too_short">Please enter your full name.</string>
+    <string name="signup_error_full_name_too_long">Name can\'t be longer than 100 characters.</string>
+    <string name="signup_error_email_invalid">Please enter a valid email address.</string>
+    <string name="signup_error_password_too_short">Password must be at least 8 characters.</string>
+    <string name="signup_error_password_confirmation_mismatch">Passwords don\'t match.</string>
+
+    <string name="password_strength_weak">Weak</string>
+    <string name="password_strength_medium">Medium</string>
+    <string name="password_strength_strong">Strong</string>
+
+    <string name="signup_pending_email_confirmation">We\'ve sent a confirmation link to your email. Please check your inbox to finish signing up.</string>
+    <string name="signin_wrong_role">This looks like a doctor or admin account. Please use the correct app to sign in.</string>
+</resources>

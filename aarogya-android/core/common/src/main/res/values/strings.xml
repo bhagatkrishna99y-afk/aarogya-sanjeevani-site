@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Every string an AppError (see error/AppError.kt) can surface to a user.
+  None of these are ever the raw exception/backend message; that text is
+  logged (Timber), never displayed. The AS0xx-coded strings mirror the
+  friendly text already approved in backend/docs/client-contract.md and
+  backend/docs/error-codes.md; the code itself (not this English text)
+  is the stable part of that contract, so these strings are free to be
+  reworded/localized without touching the mapping logic.
+-->
+<resources>
+    <!-- Generic, category-level fallbacks (no specific backend code matched). -->
+    <string name="error_network">No internet connection. Please check your connection and try again.</string>
+    <string name="error_network_timeout">That took too long to respond. Please try again.</string>
+    <string name="error_unauthorized">Your session has expired. Please sign in again.</string>
+    <string name="error_not_found_generic">That couldn\'t be found.</string>
+    <string name="error_conflict_generic">That\'s no longer available.</string>
+    <string name="error_validation_generic">Please check what you entered and try again.</string>
+    <string name="error_unknown">Something went wrong. Please try again.</string>
+
+    <!-- AS0xx registry: backend/docs/error-codes.md, friendly text per backend/docs/client-contract.md. -->
+    <string name="error_as000_not_authenticated">Please sign in to continue.</string>
+    <string name="error_as001_slot_unavailable">That time was just booked by someone else — please pick another.</string>
+    <string name="error_as002_doctor_not_available">This doctor isn\'t taking new requests right now.</string>
+    <string name="error_as003_invalid_date">That date is no longer bookable.</string>
+    <string name="error_as004_role_not_patient">Only patient accounts can book.</string>
+    <string name="error_as005_account_suspended">Your account has been suspended — contact support.</string>
+    <string name="error_as006_service_unavailable">This service isn\'t available right now.</string>
+    <string name="error_as007_doctor_required">Please choose a doctor for this service.</string>
+    <string name="error_as008_doctor_not_offered">This doctor doesn\'t offer that service.</string>
+    <string name="error_as009_mode_unsupported">That consultation type isn\'t available for this booking.</string>
+    <string name="error_as010_duplicate_request">You already have a request with this doctor at that time.</string>
+    <string name="error_as011_address_required">Please provide an address for a home visit.</string>
+    <string name="error_as012_invalid_contact_phone">Please enter a valid contact phone number.</string>
+    <string name="error_as013_text_too_long">Please shorten your notes/address.</string>
+    <string name="error_as014_doctor_not_allowed">This service doesn\'t involve a doctor — remove the doctor selection.</string>
+    <string name="error_as015_request_not_found">That request no longer exists.</string>
+    <string name="error_as016_invalid_transition">This request can no longer be updated — please refresh.</string>
+    <string name="error_as017_not_authorized_for_transition">You\'re not allowed to do that.</string>
+    <string name="error_as018_doctor_not_approved">You must be an approved doctor to accept requests.</string>
+    <string name="error_as019_slot_already_booked">That time is no longer available — it was just booked.</string>
+    <string name="error_as020_too_early_to_complete">This appointment hasn\'t happened yet.</string>
+    <string name="error_as021_cancellation_notice_window">It\'s too close to the appointment time to cancel.</string>
+    <string name="error_as022_not_a_doctor_account">Only doctor accounts can submit a profile.</string>
+    <string name="error_as023_invalid_doctor_profile_fields">Please check the profile fields.</string>
+    <string name="error_as024_only_approved_doctors">You must be approved before doing that.</string>
+    <string name="error_as025_invalid_availability_window">Please check your availability times.</string>
+    <string name="error_as026_availability_overlap">Two of your availability windows overlap.</string>
+    <string name="error_as027_not_authorized">You\'re not authorized to do that.</string>
+    <string name="error_as028_doctor_not_found">That doctor no longer exists.</string>
+    <string name="error_as029_invalid_doctor_status_transition">That status change isn\'t allowed.</string>
+    <string name="error_as030_user_not_found">That user no longer exists.</string>
+    <string name="error_as031_cannot_demote_last_admin">You can\'t remove the last admin account.</string>
+    <string name="error_as032_invalid_catalog_fields">Please check the fields and try again.</string>
+    <string name="error_as033_catalog_entity_not_found">That item no longer exists.</string>
+    <string name="error_as034_too_many_active_requests">You have too many open requests — please wait for one to be resolved before booking another.</string>
+    <string name="error_as035_rate_limited">You\'re booking too quickly — please wait a bit and try again.</string>
+
+    <!-- A couple of Supabase Auth's own error codes (not this backend's
+         AS0xx registry) that are common and friendly enough to recognize
+         everywhere sign-in happens; see AuthErrorCode in supabase-kt. -->
+    <string name="error_auth_invalid_credentials">Incorrect email or password.</string>
+    <string name="error_auth_email_not_confirmed">Please confirm your email address before signing in — check your inbox for the link we sent you.</string>
+    <string name="error_auth_email_already_in_use">An account with this email already exists. Try logging in instead.</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Content is all Compose; this only needs to exist so the Activity
+         has a window background before the first frame draws. -->
+    <style name="Theme.AarogyaDoctor" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

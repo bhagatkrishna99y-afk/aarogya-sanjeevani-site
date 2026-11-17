@@ -1,0 +1,28 @@
+# Layered on top of detekt's own default config (buildUponDefaultConfig =
+# true in AndroidLintConventionPlugin.kt -- this file only overrides the
+# handful of rules below, everything else stays as detekt's defaults).
+#
+# core:designsystem is this repo's first Compose-heavy module to go
+# through detekt, and every one of the three overrides here is the
+# standard, widely-documented reconciliation between detekt's defaults
+# (written with plain Kotlin in mind) and idiomatic Jetpack Compose:
+#
+# - A @Composable function is a UI element, named PascalCase like a type
+#   by convention (AsButton, not asButton) -- not a naming-convention
+#   violation to flag.
+# - A private top-level @Preview function has no in-source call site by
+#   design (it's an entry point for the IDE/tooling renderer, not
+#   application code) -- not a genuinely unused declaration.
+# - A richly-configurable Compose component (label, value, onValueChange,
+#   modifier, helperText, errorText, keyboardOptions, ...) routinely
+#   wants more than 6 named, defaulted parameters; that's accepted
+#   Compose API style, not a complexity smell.
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ["Composable"]
+style:
+  UnusedPrivateMember:
+    ignoreAnnotated: ["Preview"]
+complexity:
+  LongParameterList:
+    functionThreshold: 12
