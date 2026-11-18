@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import com.aarogya.sanjeevani.core.data.auth.AuthState
+import kotlinx.coroutines.flow.first
 
 /**
  * The entire auth gate, as one reactive rule: whenever [authState]
@@ -41,6 +42,15 @@ fun AuthGateEffect(
     authState: AuthState,
 ) {
     LaunchedEffect(authState) {
+        // If authState is already settled on the very first composition
+        // (e.g. a test -- or in principle a cached session resolving
+        // synchronously fast -- that starts straight at Authenticated/
+        // Unauthenticated instead of Loading first), this effect can run
+        // before NavHost has called setGraph() on this same
+        // navController, since both happen during the same initial
+        // composition. Waiting for the first real back stack entry
+        // guarantees the graph actually exists before navigate() does.
+        navController.currentBackStackEntryFlow.first()
         when (authState) {
             is AuthState.Loading -> Unit
             is AuthState.Authenticated -> {
