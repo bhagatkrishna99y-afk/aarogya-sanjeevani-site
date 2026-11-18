@@ -4,10 +4,13 @@ import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -21,6 +24,14 @@ import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
  * (avatar/icon) and trailing (chevron/status) content. [onClick], when
  * passed, makes the whole row clickable with role [Role.Button] for
  * TalkBack and keeps the row at least 48dp tall regardless of content.
+ *
+ * [contentColor], when passed, tints both the headline text and
+ * [leadingContent]'s icon (Profile's "Log out" row, in the brief's
+ * error/coral color) -- [ListItem] computes its own default colors
+ * from [androidx.compose.material3.MaterialTheme] directly rather than
+ * reading an ambient `LocalContentColor`, so a
+ * `CompositionLocalProvider` wrapped around a call site has no effect;
+ * this has to be threaded through [ListItem]'s own `colors` parameter.
  */
 @Composable
 fun AsListItem(
@@ -29,6 +40,7 @@ fun AsListItem(
     supportingText: String? = null,
     leadingContent: (@Composable () -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
+    contentColor: Color = LocalContentColor.current,
     onClick: (() -> Unit)? = null,
 ) {
     val rowModifier =
@@ -48,6 +60,11 @@ fun AsListItem(
         supportingContent = supportingText?.let { { Text(it) } },
         leadingContent = leadingContent,
         trailingContent = trailingContent,
+        colors =
+            ListItemDefaults.colors(
+                headlineColor = contentColor,
+                leadingIconColor = contentColor,
+            ),
     )
 }
 
