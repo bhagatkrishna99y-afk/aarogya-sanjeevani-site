@@ -17,5 +17,8 @@ object NetworkConfigModule {
     @Provides
     @Singleton
     fun provideSupabaseConfig(): SupabaseConfig =
-        SupabaseConfig(url = BuildConfig.SUPABASE_URL, anonKey = BuildConfig.SUPABASE_ANON_KEY)
+        SupabaseConfig(
+            url = BuildConfig.SUPABASE_URL,
+            anonKey = BuildConfig.SUPABASE_ANON_KEY,
+        )
 }
