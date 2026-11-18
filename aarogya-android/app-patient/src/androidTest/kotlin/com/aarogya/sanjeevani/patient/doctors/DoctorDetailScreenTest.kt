@@ -80,13 +80,18 @@ class DoctorDetailScreenTest {
 
         composeTestRule.onNode(hasText("View availability").and(hasClickAction())).performClick()
 
-        // The sheet is open, listing both of this doctor's services.
+        // The sheet is open, listing both of this doctor's services --
+        // "General Checkup" also appears, non-clickably, in the
+        // "Services offered" badges on the screen behind the sheet, so
+        // every lookup here matches on hasClickAction() too, to find the
+        // sheet's own row specifically (same reasoning as "View
+        // availability" above).
         composeTestRule.onNodeWithText("Choose a service").assertExists()
-        composeTestRule.onNodeWithText("General Checkup").assertExists()
-        composeTestRule.onNodeWithText("Home Nursing").assertExists()
+        composeTestRule.onNode(hasText("General Checkup").and(hasClickAction())).assertExists()
+        composeTestRule.onNode(hasText("Home Nursing").and(hasClickAction())).assertExists()
         assertNull(clickedServiceId)
 
-        composeTestRule.onNodeWithText("Home Nursing").performClick()
+        composeTestRule.onNode(hasText("Home Nursing").and(hasClickAction())).performClick()
 
         assertEquals("svc-nursing", clickedServiceId)
     }

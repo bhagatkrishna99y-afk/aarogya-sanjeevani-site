@@ -117,7 +117,10 @@ class PatientJourneyE2ETest {
             authRepository.signInAsPatient(SEEDED_PATIENT_EMAIL, SEEDED_PATIENT_PASSWORD)
             val doctorsRepository = DoctorsRepositoryImpl(client)
             val doctors = (doctorsRepository.getAllDoctors() as AppResult.Success).data
-            val approvedDoctor = doctors.single { it.doctorId.isNotBlank() && it.acceptingRequests }
+            // Any one accepting doctor proves the claim this test makes --
+            // .single() assumed the seed data had exactly one, which no
+            // longer held once a second accepting doctor was seeded.
+            val approvedDoctor = doctors.first { it.doctorId.isNotBlank() && it.acceptingRequests }
 
             val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
             val foundOpenSlot =
@@ -137,7 +140,7 @@ class PatientJourneyE2ETest {
             val doctorsRepository = DoctorsRepositoryImpl(client)
             val doctor =
                 (doctorsRepository.getAllDoctors() as AppResult.Success).data
-                    .single { it.acceptingRequests }
+                    .first { it.acceptingRequests }
             val service =
                 (ServicesRepositoryImpl(client).getServices(categoryId = null) as AppResult.Success).data
                     .first { it.requiresDoctor }
@@ -158,16 +161,25 @@ class PatientJourneyE2ETest {
                     "No open slot found for the seeded doctor in the booking window -- is the seed data fresh?",
                 )
 
+            // getServices() only orders by sort_order, which resets to 1
+            // within every category -- so the first requires-a-doctor
+            // service isn't deterministically "General Physician
+            // Consultation" (in_person+online); it could just as easily
+            // be one that's home_visit-only. Hardcoding mode = ONLINE and
+            // address = null made the backend legitimately reject the
+            // request whenever that tie broke the other way (AS011:
+            // home_visit requires a non-null address).
+            val mode = service.supportedModes.first()
             val createResult =
                 requestsRepository.createRequest(
                     NewServiceRequest(
                         serviceId = service.id,
                         doctorId = doctor.doctorId,
                         slotStart = foundSlot.slotStart,
-                        mode = ServiceMode.ONLINE,
+                        mode = mode,
                         notes = "Created by PatientJourneyE2ETest -- safe to ignore/delete.",
                         contactPhone = "9876543210",
-                        address = null,
+                        address = if (mode == ServiceMode.HOME_VISIT) "123 Test Street, Test City" else null,
                     ),
                 )
             val requestId = (createResult as AppResult.Success).data

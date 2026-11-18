@@ -3,6 +3,8 @@ package com.aarogya.sanjeevani.patient.services
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -63,7 +65,11 @@ class ServicesListScreenTest {
     fun selectingACategoryChip_filtersToJustThatCategory() {
         setContentWithReducer(initialState())
 
-        composeTestRule.onNodeWithText("Lab Tests").performClick()
+        // "Lab Tests" also appears, non-clickably, as the section header
+        // above its grouped services once that category's services are
+        // showing, so this matches on hasClickAction() too, to find the
+        // filter chip specifically.
+        composeTestRule.onNode(hasText("Lab Tests").and(hasClickAction())).performClick()
 
         composeTestRule.onNodeWithText("Blood Test").assertExists()
         composeTestRule.onNodeWithText("General Checkup").assertDoesNotExist()
@@ -73,10 +79,10 @@ class ServicesListScreenTest {
     fun tappingASelectedCategoryChipAgain_clearsBackToAll() {
         setContentWithReducer(initialState())
 
-        composeTestRule.onNodeWithText("Lab Tests").performClick()
+        composeTestRule.onNode(hasText("Lab Tests").and(hasClickAction())).performClick()
         composeTestRule.onNodeWithText("General Checkup").assertDoesNotExist()
 
-        composeTestRule.onNodeWithText("Lab Tests").performClick()
+        composeTestRule.onNode(hasText("Lab Tests").and(hasClickAction())).performClick()
 
         composeTestRule.onNodeWithText("General Checkup").assertExists()
         composeTestRule.onNodeWithText("Blood Test").assertExists()
@@ -86,7 +92,7 @@ class ServicesListScreenTest {
     fun searchAndCategoryFilterTogether_canYieldNoResults_andClearFiltersRestoresEverything() {
         setContentWithReducer(initialState())
 
-        composeTestRule.onNodeWithText("Lab Tests").performClick()
+        composeTestRule.onNode(hasText("Lab Tests").and(hasClickAction())).performClick()
         composeTestRule.onNodeWithText("Search services").performTextInput("checkup")
 
         composeTestRule.onNodeWithText("No services match your search.").assertExists()

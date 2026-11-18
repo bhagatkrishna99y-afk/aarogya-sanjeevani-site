@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -209,7 +210,12 @@ private fun ServiceRow(
     AsListItem(
         headline = service.name,
         supportingText = service.shortDescription,
-        modifier = modifier,
+        // Stable test handle -- real service names/content come from
+        // whatever the backend currently has, which a test can't know
+        // in advance (see TabStateRestorationTest, the one place this is
+        // used, for why it only needs *a* service row, not a specific
+        // one).
+        modifier = modifier.testTag("serviceRow"),
         trailingContent = {
             Column(horizontalAlignment = Alignment.End) {
                 Row(horizontalArrangement = Arrangement.spacedBy(AsTheme.spacing.xs)) {
