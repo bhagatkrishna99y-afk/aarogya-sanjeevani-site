@@ -1,5 +1,6 @@
 package com.aarogya.sanjeevani.patient.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -104,12 +106,22 @@ private fun CategoryTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // The whole tile -- icon and label together -- is the tap target,
+    // not just the icon: a generous, single touch target reads better
+    // than a smaller one nested inside a non-interactive label.
+    // AsIconTile itself gets no onClick, so there's one click handler
+    // and one set of click semantics for this tile, not two nested ones.
     Column(
-        modifier = modifier.width(CATEGORY_TILE_WIDTH),
+        modifier =
+            modifier
+                .width(CATEGORY_TILE_WIDTH)
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(onClick = onClick)
+                .padding(vertical = AsTheme.spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(AsTheme.spacing.xs),
     ) {
-        AsIconTile(icon = icon, color = color, onClick = onClick, size = 60.dp)
+        AsIconTile(icon = icon, color = color, size = 60.dp)
         Text(
             text = name,
             style = MaterialTheme.typography.labelLarge,
