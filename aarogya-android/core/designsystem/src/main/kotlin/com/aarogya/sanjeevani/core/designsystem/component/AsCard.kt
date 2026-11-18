@@ -13,6 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
@@ -36,13 +37,14 @@ import com.aarogya.sanjeevani.core.designsystem.theme.AsTheme
 fun AsCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     contentPadding: PaddingValues = PaddingValues(AsTheme.spacing.lg),
     content: @Composable () -> Unit,
 ) {
     val cardModifier = modifier.sizeIn(minHeight = if (onClick != null) 48.dp else 0.dp)
     val shape = MaterialTheme.shapes.large
     val border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    val colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    val colors = CardDefaults.cardColors(containerColor = containerColor)
     if (onClick != null) {
         Card(
             onClick = onClick,

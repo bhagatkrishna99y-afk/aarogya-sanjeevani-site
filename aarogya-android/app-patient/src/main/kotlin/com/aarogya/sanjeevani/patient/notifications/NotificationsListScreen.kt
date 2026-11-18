@@ -210,6 +210,15 @@ private fun NotificationCard(
         }
     AsCard(
         onClick = onClick,
+        // Unread notifications get a real tint, not just the dot --
+        // the brief's violet "Unread" marker, carried through to the
+        // whole card.
+        containerColor =
+            if (!notification.isRead) {
+                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            },
         modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { contentDescription = description },
     ) {
         Row(
@@ -220,7 +229,7 @@ private fun NotificationCard(
                 Surface(
                     modifier = Modifier.size(8.dp).padding(top = 6.dp),
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.secondary,
                 ) {}
             } else {
                 Spacer(modifier = Modifier.size(8.dp))
