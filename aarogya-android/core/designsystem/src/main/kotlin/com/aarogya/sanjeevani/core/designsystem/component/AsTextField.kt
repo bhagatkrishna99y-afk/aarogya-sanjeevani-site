@@ -20,7 +20,9 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalAutofill
@@ -45,6 +48,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
+import com.aarogya.sanjeevani.core.designsystem.theme.InputShape
 
 /**
  * The one text field every form field in either app should use.
@@ -78,7 +82,9 @@ fun AsTextField(
     errorText: String? = null,
     isPassword: Boolean = false,
     enabled: Boolean = true,
+    readOnly: Boolean = false,
     singleLine: Boolean = true,
+    leadingIcon: ImageVector? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     autofillTypes: List<AutofillType> = emptyList(),
@@ -120,7 +126,20 @@ fun AsTextField(
                     }
                 },
         enabled = enabled,
+        readOnly = readOnly,
+        shape = InputShape,
+        colors =
+            if (readOnly) {
+                OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            } else {
+                OutlinedTextFieldDefaults.colors()
+            },
         label = { Text(label) },
+        leadingIcon = leadingIcon?.let { icon -> { Icon(imageVector = icon, contentDescription = null) } },
         isError = isError,
         singleLine = singleLine,
         visualTransformation =

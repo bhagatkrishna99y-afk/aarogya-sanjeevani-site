@@ -11,12 +11,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.EventAvailable
 import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.PauseCircle
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,7 +51,7 @@ private const val PREVIEW_REQUEST_STATUS_COUNT = 3
  */
 enum class AsRequestStatus(val label: String, val icon: ImageVector) {
     Requested(label = "Requested", icon = Icons.Outlined.Schedule),
-    Accepted(label = "Accepted", icon = Icons.Outlined.ThumbUp),
+    Accepted(label = "Accepted", icon = Icons.Outlined.Check),
     Confirmed(label = "Confirmed", icon = Icons.Outlined.EventAvailable),
     Completed(label = "Completed", icon = Icons.Outlined.CheckCircle),
     Rejected(label = "Rejected", icon = Icons.Outlined.Cancel),

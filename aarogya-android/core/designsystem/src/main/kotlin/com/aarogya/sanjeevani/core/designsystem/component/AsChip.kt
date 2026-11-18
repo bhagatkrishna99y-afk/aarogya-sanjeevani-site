@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
+import com.aarogya.sanjeevani.core.designsystem.theme.PillShape
 
 /** A selectable filter chip -- a service category, a specialty, a day
  *  of the week. [selected] drives both its look and its a11y state
@@ -36,6 +38,13 @@ fun AsChip(
         onClick = onClick,
         label = { Text(label) },
         modifier = modifier,
+        shape = PillShape,
+        colors =
+            FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.primary,
+                selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
+            ),
         leadingIcon =
             if (selected) {
                 {

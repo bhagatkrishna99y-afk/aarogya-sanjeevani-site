@@ -1,6 +1,7 @@
 package com.aarogya.sanjeevani.core.designsystem.component
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -20,6 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -28,8 +31,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
 import com.aarogya.sanjeevani.core.designsystem.theme.AsTheme
+import com.aarogya.sanjeevani.core.designsystem.theme.isReducedMotionEnabled
 
-private const val SHIMMER_ANIMATION_DURATION_MS = 800
+// Matches the approved redesign brief's shimmer spec: a 1.3s, linear,
+// non-reversing sweep (not the alpha pulse this used before).
+private const val SHIMMER_ANIMATION_DURATION_MS = 1300
+private const val SHIMMER_SWEEP_WIDTH_PX = 480f
 
 /** Apply to the `Column`/`Box` wrapping a group of [SkeletonShimmer] bars
  *  so TalkBack announces "Loading" once for the whole group -- otherwise
@@ -38,32 +45,51 @@ private const val SHIMMER_ANIMATION_DURATION_MS = 800
 fun Modifier.loadingGroupSemantics(label: String = "Loading"): Modifier = semantics { contentDescription = label }
 
 /**
- * A loading placeholder bar -- a pulsing `surfaceVariant` block shaped
- * like the content it stands in for (a list row, a line of text).
- * Carries no semantics of its own ([clearAndSetSemantics] with nothing
- * set): a screen with several of these in a row should announce
- * "Loading" once for the whole list/section, not once per shimmer bar.
+ * A loading placeholder bar -- a `surfaceVariant` block, shaped like the
+ * content it stands in for (a list row, a line of text), with a light
+ * highlight band sweeping across it left-to-right. Carries no semantics
+ * of its own ([clearAndSetSemantics] with nothing set): a screen with
+ * several of these in a row should announce "Loading" once for the
+ * whole list/section, not once per shimmer bar. The sweep itself is
+ * skipped (a static block shown instead) when the system's reduce-
+ * motion setting is on -- see [isReducedMotionEnabled].
  */
 @Composable
 fun SkeletonShimmer(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(8.dp),
 ) {
+    val baseColor = MaterialTheme.colorScheme.surfaceVariant
+    if (isReducedMotionEnabled()) {
+        Box(modifier = modifier.clip(shape).background(baseColor).clearAndSetSemantics {})
+        return
+    }
+
+    val highlightColor = MaterialTheme.colorScheme.surfaceBright
     val transition = rememberInfiniteTransition(label = "skeleton-shimmer")
-    val alpha by
+    val offset by
         transition.animateFloat(
-            initialValue = 0.3f,
-            targetValue = 0.9f,
+            initialValue = -SHIMMER_SWEEP_WIDTH_PX,
+            targetValue = SHIMMER_SWEEP_WIDTH_PX,
             animationSpec =
-                infiniteRepeatable(animation = tween(SHIMMER_ANIMATION_DURATION_MS), repeatMode = RepeatMode.Reverse),
-            label = "skeleton-shimmer-alpha",
+                infiniteRepeatable(
+                    animation = tween(SHIMMER_ANIMATION_DURATION_MS, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart,
+                ),
+            label = "skeleton-shimmer-offset",
         )
 
     Box(
         modifier =
             modifier
                 .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = alpha))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(baseColor, highlightColor, baseColor),
+                        start = Offset(offset - SHIMMER_SWEEP_WIDTH_PX, 0f),
+                        end = Offset(offset + SHIMMER_SWEEP_WIDTH_PX, 0f),
+                    ),
+                )
                 .clearAndSetSemantics {},
     )
 }
