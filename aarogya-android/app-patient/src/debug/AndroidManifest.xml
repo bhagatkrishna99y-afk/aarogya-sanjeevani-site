@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
+        <!-- exported="true" because this declares a MAIN/LAUNCHER
+             intent-filter (required for ActivityScenario/Espresso to
+             resolve it as a launchable activity): lint's own
+             IntentFilterExportedReceiver rule requires that combination.
+             Debug-only (never ships in release), does nothing but host
+             whatever Compose content a test sets on it, so there is
+             nothing sensitive exported. -->
         <activity
             android:name=".HiltTestActivity"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
