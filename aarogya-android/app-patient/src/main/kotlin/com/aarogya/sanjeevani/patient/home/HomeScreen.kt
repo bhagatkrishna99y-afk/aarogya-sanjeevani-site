@@ -1,16 +1,24 @@
 package com.aarogya.sanjeevani.patient.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +35,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -306,11 +317,63 @@ private fun QuickActionsRow(
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AsTheme.spacing.md)) {
-        AsCard(onClick = onBrowseServicesClick, modifier = Modifier.weight(1f)) {
-            Text(text = "Browse Services", style = MaterialTheme.typography.titleSmall)
-        }
-        AsCard(onClick = onFindDoctorClick, modifier = Modifier.weight(1f)) {
-            Text(text = "Find a Doctor", style = MaterialTheme.typography.titleSmall)
+        QuickActionCard(
+            label = "Browse\nservices",
+            icon = Icons.Filled.GridView,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            onClick = onBrowseServicesClick,
+            modifier = Modifier.weight(1f),
+        )
+        QuickActionCard(
+            label = "Find a\ndoctor",
+            icon = Icons.Filled.MonitorHeart,
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = MaterialTheme.colorScheme.onSecondary,
+            onClick = onFindDoctorClick,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+/** One of Home's two quick-action entry points -- a solid-color card
+ *  (not [AsCard]'s white/outlined surface, deliberately: these two are
+ *  meant to read as the screen's boldest, most inviting elements) with
+ *  a soft translucent decorative circle in the top-right corner, per
+ *  the approved redesign brief. */
+@Composable
+private fun QuickActionCard(
+    label: String,
+    icon: ImageVector,
+    containerColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 108.dp),
+        shape = MaterialTheme.shapes.large,
+        color = containerColor,
+        contentColor = contentColor,
+    ) {
+        Box {
+            Box(
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = 26.dp, y = (-26).dp)
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(contentColor.copy(alpha = 0.16f)),
+            )
+            Column(
+                modifier = Modifier.padding(AsTheme.spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AsTheme.spacing.md),
+            ) {
+                Icon(imageVector = icon, contentDescription = null)
+                Text(text = label, style = MaterialTheme.typography.titleSmall)
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aarogya.sanjeevani.core.data.doctors.DoctorPublic
@@ -24,7 +25,8 @@ import com.aarogya.sanjeevani.core.designsystem.component.AsAvatar
 import com.aarogya.sanjeevani.core.designsystem.component.AsButton
 import com.aarogya.sanjeevani.core.designsystem.component.AsButtonVariant
 import com.aarogya.sanjeevani.core.designsystem.component.AsCard
-import com.aarogya.sanjeevani.core.designsystem.component.AsChip
+import com.aarogya.sanjeevani.core.designsystem.component.AsIconTile
+import com.aarogya.sanjeevani.core.designsystem.component.AsIconTileColor
 import com.aarogya.sanjeevani.core.designsystem.component.SectionHeader
 import com.aarogya.sanjeevani.core.designsystem.component.SkeletonShimmer
 import com.aarogya.sanjeevani.core.designsystem.component.StatusChip
@@ -54,7 +56,10 @@ internal fun CategoriesSection(
                     modifier = Modifier.loadingGroupSemantics(),
                 ) {
                     items(CATEGORY_SHIMMER_COUNT) {
-                        SkeletonShimmer(modifier = Modifier.width(110.dp).height(36.dp))
+                        SkeletonShimmer(
+                            modifier = Modifier.width(CATEGORY_TILE_WIDTH).height(60.dp),
+                            shape = MaterialTheme.shapes.medium,
+                        )
                     }
                 }
             is HomeSectionState.Error ->
@@ -75,16 +80,42 @@ internal fun CategoriesSection(
                         horizontalArrangement = Arrangement.spacedBy(AsTheme.spacing.sm),
                     ) {
                         items(state.data, key = { it.id }) { category ->
-                            AsChip(
-                                label = category.name,
-                                selected = false,
+                            val index = state.data.indexOf(category)
+                            CategoryTile(
+                                name = category.name,
+                                icon = iconForCategory(category.icon),
+                                color = AsIconTileColor.entries[index % AsIconTileColor.entries.size],
                                 onClick = { onCategoryClick(category.id) },
-                                leadingIcon = iconForCategory(category.icon),
                             )
                         }
                     }
                 }
         }
+    }
+}
+
+private val CATEGORY_TILE_WIDTH = 84.dp
+
+@Composable
+private fun CategoryTile(
+    name: String,
+    icon: ImageVector,
+    color: AsIconTileColor,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.width(CATEGORY_TILE_WIDTH),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(AsTheme.spacing.xs),
+    ) {
+        AsIconTile(icon = icon, color = color, onClick = onClick, size = 60.dp)
+        Text(
+            text = name,
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+        )
     }
 }
 

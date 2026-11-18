@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -36,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -384,11 +386,13 @@ private fun AccountListItems(
             leadingContent = { Icon(Icons.Filled.DeleteForever, contentDescription = null) },
             onClick = onDeleteAccountClick,
         )
-        AsListItem(
-            headline = "Log out",
-            leadingContent = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
-            onClick = onLogoutClick,
-        )
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.error) {
+            AsListItem(
+                headline = "Log out",
+                leadingContent = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
+                onClick = onLogoutClick,
+            )
+        }
     }
 }
 

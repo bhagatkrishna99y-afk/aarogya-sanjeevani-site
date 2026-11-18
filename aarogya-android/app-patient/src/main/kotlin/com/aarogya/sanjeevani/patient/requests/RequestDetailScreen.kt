@@ -166,7 +166,7 @@ private fun RequestDetailContent(
             AsButton(
                 text = "Cancel request",
                 onClick = { onAction(RequestDetailAction.CancelClicked) },
-                variant = AsButtonVariant.Secondary,
+                variant = AsButtonVariant.Danger,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
