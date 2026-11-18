@@ -1,10 +1,18 @@
 package com.aarogya.sanjeevani.patient.auth.welcome
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -14,6 +22,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
+import com.aarogya.sanjeevani.core.designsystem.theme.isReducedMotionEnabled
 
 /**
  * This app's brand mark -- a rounded badge with a pulse/cross motif,
@@ -69,6 +78,31 @@ fun BrandLogo(
  * TalkBack from describing shapes that carry no information on their
  * own -- the value proposition next to it is the real content.
  */
+private const val FLOAT_AMPLITUDE_DP = 8f
+private const val FLOAT_DURATION_MS = 4000
+
+/** The brief's "gentle float" for the Welcome screen's logo/illustration
+ *  -- a slow +/-8dp vertical drift, skipped entirely under reduced
+ *  motion rather than snapped to a fixed offset, since a non-looping
+ *  static illustration needs no "settled" position of its own. */
+@Composable
+private fun rememberFloatOffset(): Float {
+    if (isReducedMotionEnabled()) return 0f
+    val transition = rememberInfiniteTransition(label = "welcome-float")
+    val offset by
+        transition.animateFloat(
+            initialValue = -FLOAT_AMPLITUDE_DP,
+            targetValue = FLOAT_AMPLITUDE_DP,
+            animationSpec =
+                infiniteRepeatable(
+                    animation = tween(FLOAT_DURATION_MS / 2, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse,
+                ),
+            label = "welcome-float-offset",
+        )
+    return offset
+}
+
 @Suppress("MagicNumber")
 @Composable
 fun WelcomeIllustration(modifier: Modifier = Modifier) {
@@ -76,12 +110,14 @@ fun WelcomeIllustration(modifier: Modifier = Modifier) {
     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
     val tertiary = MaterialTheme.colorScheme.tertiary
     val surface = MaterialTheme.colorScheme.surface
+    val floatOffset = rememberFloatOffset()
 
     Canvas(
         modifier =
             modifier
                 .size(240.dp)
                 .aspectRatio(1f)
+                .offset(y = floatOffset.dp)
                 .clearAndSetSemantics {},
     ) {
         val w = size.width
