@@ -6,14 +6,14 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import com.aarogya.sanjeevani.core.designsystem.R
 
-// Same two-font pairing as the marketing website (website/docs/design-
-// tokens.md's Typography section) -- Figtree for headings, Noto Sans for
-// body, both humanist sans faces. The website self-hosts them via
-// Fontsource; Android has no equivalent "bundle the .ttf" story without
-// shipping binary font files in this repo, so these are fetched through
-// Jetpack Compose's downloadable-fonts API instead (cached on-device by
-// Google Play services after first fetch, so this isn't a per-screen
-// network request). res/values/font_certs.xml carries the (non-secret,
+// Approved redesign spec: Plus Jakarta Sans for both headings and body,
+// weights 400/500/600/700/800. This repo has no mechanism to author or
+// vendor binary .ttf files, so rather than a half-finished "bundle the
+// font files" attempt, this keeps the same downloadable-fonts delivery
+// the previous pairing already used (cached on-device by Google Play
+// services after first fetch, not a per-screen network request) and
+// just points it at the new family -- same visual result, no fake
+// binaries. res/values/font_certs.xml carries the (non-secret,
 // identical-for-every-app) provider certificate this API requires.
 private val GoogleFontProvider =
     GoogleFont.Provider(
@@ -36,12 +36,16 @@ private fun googleFontFamily(fontName: String) =
             weight = FontWeight.SemiBold,
         ),
         Font(googleFont = GoogleFont(fontName), fontProvider = GoogleFontProvider, weight = FontWeight.Bold),
+        Font(
+            googleFont = GoogleFont(fontName),
+            fontProvider = GoogleFontProvider,
+            weight = FontWeight.ExtraBold,
+        ),
     )
 
-/** Headings -- Figtree, a humanist geometric sans with a touch of warmth. */
-val HeadingFontFamily = googleFontFamily("Figtree")
+/** Headings -- Plus Jakarta Sans, per the approved redesign brief. */
+val HeadingFontFamily = googleFontFamily("Plus Jakarta Sans")
 
-/** Body copy -- Noto Sans, chosen (same reasoning as the website) for
- *  legibility over a more stylized face, appropriate for healthcare copy
- *  that needs to be read correctly, not just skimmed. */
-val BodyFontFamily = googleFontFamily("Noto Sans")
+/** Body copy -- same family as headings per the brief (a single-typeface
+ *  system, unlike the previous heading/body pairing). */
+val BodyFontFamily = googleFontFamily("Plus Jakarta Sans")

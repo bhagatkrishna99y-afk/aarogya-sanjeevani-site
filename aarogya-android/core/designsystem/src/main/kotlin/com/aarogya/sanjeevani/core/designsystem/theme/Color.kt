@@ -4,136 +4,116 @@ package com.aarogya.sanjeevani.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Every scale here is the same brand palette as the marketing website
-// (website/docs/design-tokens.md, itself sourced from
-// website/src/styles/index.css's `@theme` block) -- one brand across
-// platforms. Tone numbers follow Material 3 convention (0 = black,
-// 100 = white; lower number = darker), each one mapped onto the
-// Tailwind shade the website already uses and names in that doc, so a
-// value here can always be traced back to a specific website shade.
-//
-// Every pairing this file's ColorScheme/ExtendedColors actually use
-// (container + on-container, main + on-main) was verified against the
-// WCAG 2 relative-luminance contrast formula -- see
-// ../../../../../../../../docs/design-tokens.md in this module's repo
-// root for the full ratio table. None of that verification is repeated
-// per-value here; only the Tailwind shade each tone maps to is noted,
-// so the doc and this file can be cross-checked against each other.
+// Approved patient-app visual redesign palette. Named roles below are
+// exactly the hex values from the design brief (ocean teal primary,
+// violet secondary, coral tertiary/alert); tonal ramps around each are
+// this module's own derivation for dark-theme/container variants where
+// the brief didn't specify one, following the same Tailwind-shade-chain
+// convention the rest of this file already used (lower number = darker).
 
-// ---- Brand -- teal (primary + secondary both pull from this one hue;
-// secondary just uses a different tone pair, see Theme.kt) ---------------
-val Brand10 = Color(0xFF042F2E) // teal-950
-val Brand20 = Color(0xFF0C4A45) // between teal-950/900, pre-existing value
-val Brand30 = Color(0xFF115E59) // teal-800
-val Brand40 = Color(0xFF0F766E) // teal-700 -- text-safe main, per website doc
-val Brand50 = Color(0xFF0D9488) // teal-600 -- decorative only (border/icon), per website doc
-val Brand60 = Color(0xFF14B8A6) // teal-500
-val Brand70 = Color(0xFF2DD4BF) // teal-400
-val Brand80 = Color(0xFF5EEAD4) // teal-300
-val Brand90 = Color(0xFF99F6E4) // teal-200
-val Brand95 = Color(0xFFCCFBF1) // teal-100
-val Brand99 = Color(0xFFF0FDFA) // teal-50
+// ---- Brand -- ocean teal (primary) --------------------------------------
+val Teal10 = Color(0xFF042F2E)
+val Teal20 = Color(0xFF0C3B42)
+val Teal30 = Color(0xFF0A5365)
+val Teal40 = Color(0xFF0E7490) // text-safe main -- exact brief value
+val Teal50 = Color(0xFF0E88A8)
+val Teal60 = Color(0xFF0891B2)
+val Teal70 = Color(0xFF22D3EE)
+val Teal80 = Color(0xFF67E8F9)
+val Teal90 = Color(0xFFA5F3FC)
+val Teal95 = Color(0xFFDDF3F6) // sky tint -- exact brief value (primaryContainer)
+val Teal99 = Color(0xFFF2F8FA) // canvas background -- exact brief value
 
-// ---- Accent -- warm orange (tertiary role; a near-complement of the
-// teal primary, never used for anything alarm-coded -- that's `Error`) --
-val Accent10 = Color(0xFF431407) // orange-950
-val Accent20 = Color(0xFF7C2D12) // orange-900
-val Accent30 = Color(0xFF9A3412) // orange-800
-val Accent40 = Color(0xFFC2410C) // orange-700 -- text-safe main, per website doc
-val Accent50 = Color(0xFFEA580C) // orange-600 -- decorative only, per website doc
-
-// orange-500 -- swatch/illustrative only; fails even the 3:1 bar on white per website doc
-val Accent60 = Color(0xFFF97316)
-val Accent70 = Color(0xFFFB923C) // orange-400
-val Accent80 = Color(0xFFFDBA74) // orange-300
-val Accent90 = Color(0xFFFED7AA) // orange-200
-val Accent95 = Color(0xFFFFEDD5) // orange-100
-val Accent99 = Color(0xFFFFF7ED) // orange-50
-
-// ---- Semantic: success (emerald) ----------------------------------------
-val Success10 = Color(0xFF022C22) // emerald-950
-val Success20 = Color(0xFF064E3B) // emerald-900
-val Success30 = Color(0xFF065F46) // emerald-800
-val Success40 = Color(0xFF047857) // emerald-700 -- text-safe main, per website doc
-val Success50 = Color(0xFF059669) // emerald-600
-val Success60 = Color(0xFF10B981) // emerald-500
-val Success70 = Color(0xFF34D399) // emerald-400
-val Success80 = Color(0xFF6EE7B7) // emerald-300
-val Success90 = Color(0xFFA7F3D0) // emerald-200
-val Success95 = Color(0xFFD1FAE5) // emerald-100
-val Success99 = Color(0xFFECFDF5) // emerald-50
-
-// ---- Semantic: warning (amber) ------------------------------------------
-val Warning10 = Color(0xFF451A03) // amber-950
-val Warning20 = Color(0xFF78350F) // amber-900
-val Warning30 = Color(0xFF92400E) // amber-800
-val Warning40 = Color(0xFFB45309) // amber-700 -- text-safe main, tightest margin in the palette per website doc
-val Warning50 = Color(0xFFD97706) // amber-600
-val Warning60 = Color(0xFFF59E0B) // amber-500 -- can carry dark text only, per website doc
-val Warning70 = Color(0xFFFBBF24) // amber-400
-val Warning80 = Color(0xFFFCD34D) // amber-300
-val Warning90 = Color(0xFFFDE68A) // amber-200
-val Warning95 = Color(0xFFFEF3C7) // amber-100
-val Warning99 = Color(0xFFFFFBEB) // amber-50
-
-// ---- Semantic: info (sky) -----------------------------------------------
-val Info10 = Color(0xFF082F49) // sky-950
-val Info20 = Color(0xFF0C4A6E) // sky-900
-val Info30 = Color(0xFF075985) // sky-800
-val Info40 = Color(0xFF0369A1) // sky-700 -- text-safe main, per website doc
-val Info50 = Color(0xFF0284C7) // sky-600
-val Info60 = Color(0xFF0EA5E9) // sky-500
-val Info70 = Color(0xFF38BDF8) // sky-400
-val Info80 = Color(0xFF7DD3FC) // sky-300
-val Info90 = Color(0xFFBAE6FD) // sky-200
-val Info95 = Color(0xFFE0F2FE) // sky-100
-val Info99 = Color(0xFFF0F9FF) // sky-50
-
-// ---- Semantic: error (red) ----------------------------------------------
-val Error10 = Color(0xFF450A0A) // red-950
-val Error20 = Color(0xFF7F1D1D) // red-900
-val Error30 = Color(0xFF991B1B) // red-800
-val Error40 = Color(0xFFB91C1C) // red-700 -- text-safe main, per website doc
-val Error50 = Color(0xFFDC2626) // red-600
-val Error60 = Color(0xFFEF4444) // red-500
-val Error70 = Color(0xFFF87171) // red-400
-val Error80 = Color(0xFFFCA5A5) // red-300
-val Error90 = Color(0xFFFECACA) // red-200
-val Error95 = Color(0xFFFEE2E2) // red-100
-val Error99 = Color(0xFFFEF2F2) // red-50
-
-// ---- Status-only hue: violet, for doctor-status "suspended" -- deliberately
-// distinct from `Error` red so a suspended doctor is never visually
-// confused with a rejected one at a glance. ------------------------------
-val Violet10 = Color(0xFF2E1065)
-val Violet20 = Color(0xFF4C1D95)
-val Violet30 = Color(0xFF5B21B6)
-val Violet40 = Color(0xFF6D28D9)
-val Violet50 = Color(0xFF7C3AED)
-val Violet60 = Color(0xFF8B5CF6)
-val Violet70 = Color(0xFFA78BFA)
+// ---- Brand -- violet (secondary) ----------------------------------------
+val Violet10 = Color(0xFF1E1240)
+val Violet20 = Color(0xFF2E1065)
+val Violet30 = Color(0xFF3F2A8C)
+val Violet40 = Color(0xFF5B3FD1) // text-safe main -- exact brief value
+val Violet50 = Color(0xFF6D28D9)
+val Violet60 = Color(0xFF7C3AED)
+val Violet70 = Color(0xFF9B7CF2)
 val Violet80 = Color(0xFFC4B5FD)
 val Violet90 = Color(0xFFDDD6FE)
-val Violet95 = Color(0xFFEDE9FE)
+val Violet95 = Color(0xFFECE6FF) // category-tile container -- exact brief value
 val Violet99 = Color(0xFFFAF5FF)
 
-// ---- Neutral -- slate (background/surface/outline roles) ---------------
-// Tailwind's `slate` scale, same one the website already uses for every
-// neutral/background role -- not a separate "designed" neutral invented
-// just for Android.
-val Neutral0 = Color(0xFF020617) // slate-950
-val Neutral10 = Color(0xFF0F172A) // slate-900
-val Neutral20 = Color(0xFF1E293B) // slate-800
-val Neutral30 = Color(0xFF334155) // slate-700
-val Neutral40 = Color(0xFF475569) // slate-600
+// ---- Brand -- coral (tertiary/alert) -------------------------------------
+val Coral10 = Color(0xFF3D0A14)
+val Coral20 = Color(0xFF5C0F1E)
+val Coral30 = Color(0xFF8A1E32)
+val Coral40 = Color(0xFFC8324A) // text-safe main -- exact brief value
+val Coral50 = Color(0xFFD94C63)
+val Coral60 = Color(0xFFE56B80)
+val Coral70 = Color(0xFFF08FA0)
+val Coral80 = Color(0xFFF7B4C0)
+val Coral90 = Color(0xFFFCDCE2)
+val Coral95 = Color(0xFFFFE3E8) // category-tile container -- exact brief value
+val Coral99 = Color(0xFFFFF4F6)
 
-// slate-500 -- passes AA by a slim margin per website doc; prefer 30/40 when there's room
-val Neutral50 = Color(0xFF64748B)
+// ---- Semantic: success (green, request "Confirmed"/"Completed"-adjacent) --
+val Success10 = Color(0xFF052E16)
+val Success20 = Color(0xFF14532D) // Confirmed chip text -- exact brief value
+val Success30 = Color(0xFF166534)
+val Success40 = Color(0xFF15803D) // category-tile fg -- exact brief value
+val Success50 = Color(0xFF16A34A)
+val Success60 = Color(0xFF22C55E)
+val Success70 = Color(0xFF4ADE80)
+val Success80 = Color(0xFF86EFAC)
+val Success90 = Color(0xFFBBF7D0)
+val Success95 = Color(0xFFDCFCE7) // Confirmed chip bg -- exact brief value
+val Success99 = Color(0xFFF0FDF4)
 
-// slate-400 -- decorative/disabled only, never real text, per website doc
-val Neutral60 = Color(0xFF94A3B8)
-val Neutral70 = Color(0xFFCBD5E1) // slate-300
-val Neutral80 = Color(0xFFE2E8F0) // slate-200
-val Neutral90 = Color(0xFFF1F5F9) // slate-100
-val Neutral95 = Color(0xFFF8FAFC) // slate-50
-val Neutral99 = Color(0xFFFFFFFF)
+// ---- Semantic: warning/amber (request "Requested", category tile) --------
+val Amber10 = Color(0xFF2D1600)
+val Amber20 = Color(0xFF4A2600)
+val Amber30 = Color(0xFF6B3700)
+val Amber40 = Color(0xFF8A4B08) // Requested chip text -- exact brief value
+val Amber50 = Color(0xFFB45309) // category-tile fg -- exact brief value
+val Amber60 = Color(0xFFD97706)
+val Amber70 = Color(0xFFF59E0B)
+val Amber80 = Color(0xFFFCD34D)
+val Amber90 = Color(0xFFFDE68A)
+val Amber95 = Color(0xFFFEF3C7) // Requested chip bg -- exact brief value
+val Amber99 = Color(0xFFFFFBEB)
+
+// ---- Semantic: info/blue (request "Accepted") ----------------------------
+val Blue10 = Color(0xFF0B1F4A)
+val Blue20 = Color(0xFF142B6B)
+val Blue30 = Color(0xFF1E3A8A)
+val Blue40 = Color(0xFF1E40AF) // Accepted chip text -- exact brief value
+val Blue50 = Color(0xFF2563EB)
+val Blue60 = Color(0xFF3B82F6)
+val Blue70 = Color(0xFF60A5FA)
+val Blue80 = Color(0xFF93C5FD)
+val Blue90 = Color(0xFFBFDBFE)
+val Blue95 = Color(0xFFDBEAFE) // Accepted chip bg -- exact brief value
+val Blue99 = Color(0xFFEFF6FF)
+
+// ---- Semantic: error/red (errors + request "Rejected") -------------------
+val Red10 = Color(0xFF450A0A)
+val Red20 = Color(0xFF5C1010)
+val Red30 = Color(0xFF7F1D1D)
+val Red40 = Color(0xFF991B1B) // Rejected chip text -- exact brief value
+val Red50 = Color(0xFFB42318) // error main -- exact brief value
+val Red60 = Color(0xFFDC2626)
+val Red70 = Color(0xFFEF4444)
+val Red80 = Color(0xFFFCA5A5)
+val Red90 = Color(0xFFFECACA)
+val Red95 = Color(0xFFFEE2E2) // Rejected chip bg -- exact brief value
+val Red99 = Color(0xFFFEF2F2)
+
+// ---- Neutral -- ink/slate (background/surface/outline/"Cancelled"/"Completed") --
+val Neutral10 = Color(0xFF0B1720) // dark background -- exact brief value
+val Neutral15 = Color(0xFF12222D) // dark surface -- exact brief value
+val Neutral20 = Color(0xFF1B2E3A)
+val Neutral30 = Color(0xFF263B48)
+val Neutral40 = Color(0xFF374151) // Completed chip text -- exact brief value
+val Neutral50 = Color(0xFF475B6B) // onSurfaceVariant/muted -- exact brief value
+val Neutral60 = Color(0xFF4B5563) // Cancelled chip text -- exact brief value
+val Neutral70 = Color(0xFFC4D4DF) // outline -- exact brief value
+val Neutral80 = Color(0xFFDCE7EE) // outlineVariant -- exact brief value
+val Neutral85 = Color(0xFFE5E7EB) // Completed chip bg -- exact brief value
+val Neutral90 = Color(0xFFEEF0F2) // Cancelled chip bg -- exact brief value
+val Neutral95 = Color(0xFFF2F8FA) // background -- exact brief value (same as Teal99)
+val Neutral99 = Color(0xFFFFFFFF) // surface -- exact brief value
+val InkDark = Color(0xFF0F2230) // onSurface/ink -- exact brief value

@@ -5,85 +5,86 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Material 3's baseline type scale (sizes/line-heights/letter-spacing
-// unchanged from the M3 spec -- not reinvented, same call the website
-// made keeping Tailwind's own scale, see website/docs/design-tokens.md),
-// with [HeadingFontFamily]/[BodyFontFamily] (Font.kt) swapped in for
-// Material's Roboto default, and a little extra weight on the heading
-// styles for a more premium, less default-Android feel.
+// Approved redesign spec's scale: headline 26/800, title 20/700, body
+// 15/400, label 13/700, caption 12. M3's own slot names are kept (no
+// call site needs to change) with sizes/weights remapped onto them;
+// line-heights/letter-spacing follow M3's own ratio for each role
+// rather than being reinvented.
 val AarogyaTypography =
     Typography(
         displayLarge =
             TextStyle(
                 fontFamily = HeadingFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 57.sp,
-                lineHeight = 64.sp,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 40.sp,
+                lineHeight = 48.sp,
                 letterSpacing = (-0.25).sp,
             ),
         displayMedium =
             TextStyle(
                 fontFamily = HeadingFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 45.sp,
-                lineHeight = 52.sp,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 34.sp,
+                lineHeight = 42.sp,
                 letterSpacing = 0.sp,
             ),
         displaySmall =
             TextStyle(
                 fontFamily = HeadingFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 36.sp,
-                lineHeight = 44.sp,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 30.sp,
+                lineHeight = 38.sp,
                 letterSpacing = 0.sp,
             ),
         headlineLarge =
             TextStyle(
                 fontFamily = HeadingFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 32.sp,
-                lineHeight = 40.sp,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 28.sp,
+                lineHeight = 34.sp,
                 letterSpacing = 0.sp,
             ),
         headlineMedium =
             TextStyle(
                 fontFamily = HeadingFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 28.sp,
-                lineHeight = 36.sp,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 26.sp,
+                lineHeight = 32.sp,
                 letterSpacing = 0.sp,
             ),
+        // "Headline" per the brief -- 26/800.
         headlineSmall =
             TextStyle(
                 fontFamily = HeadingFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 26.sp,
                 lineHeight = 32.sp,
                 letterSpacing = 0.sp,
             ),
         titleLarge =
             TextStyle(
                 fontFamily = HeadingFontFamily,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
                 lineHeight = 28.sp,
                 letterSpacing = 0.sp,
             ),
+        // "Title" per the brief -- 20/700.
         titleMedium =
             TextStyle(
                 fontFamily = HeadingFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                letterSpacing = 0.15.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                lineHeight = 26.sp,
+                letterSpacing = 0.sp,
             ),
         titleSmall =
             TextStyle(
                 fontFamily = HeadingFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
-                lineHeight = 20.sp,
-                letterSpacing = 0.1.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                lineHeight = 22.sp,
+                letterSpacing = 0.sp,
             ),
         bodyLarge =
             TextStyle(
@@ -91,46 +92,49 @@ val AarogyaTypography =
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
-                letterSpacing = 0.5.sp,
+                letterSpacing = 0.2.sp,
             ),
+        // "Body" per the brief -- 15/400.
         bodyMedium =
             TextStyle(
                 fontFamily = BodyFontFamily,
                 fontWeight = FontWeight.Normal,
-                fontSize = 14.sp,
-                lineHeight = 20.sp,
-                letterSpacing = 0.25.sp,
+                fontSize = 15.sp,
+                lineHeight = 22.sp,
+                letterSpacing = 0.1.sp,
             ),
+        // "Caption" per the brief -- 12.
         bodySmall =
             TextStyle(
                 fontFamily = BodyFontFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
-                letterSpacing = 0.4.sp,
+                letterSpacing = 0.1.sp,
             ),
+        // "Label" per the brief -- 13/700.
         labelLarge =
             TextStyle(
                 fontFamily = BodyFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
-                lineHeight = 20.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
                 letterSpacing = 0.1.sp,
             ),
         labelMedium =
             TextStyle(
                 fontFamily = BodyFontFamily,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
-                letterSpacing = 0.5.sp,
+                letterSpacing = 0.3.sp,
             ),
         labelSmall =
             TextStyle(
                 fontFamily = BodyFontFamily,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 fontSize = 11.sp,
-                lineHeight = 16.sp,
-                letterSpacing = 0.5.sp,
+                lineHeight = 15.sp,
+                letterSpacing = 0.3.sp,
             ),
     )
