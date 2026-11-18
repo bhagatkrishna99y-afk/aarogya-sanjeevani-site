@@ -15,6 +15,11 @@ android {
 
     defaultConfig {
         applicationId = "com.aarogya.sanjeevani.patient"
+        // The shared convention plugin's stock AndroidJUnitRunner doesn't
+        // swap in HiltTestApplication, which any test rendering a real
+        // (non-faked) Hilt-injected screen needs -- see HiltTestRunner's
+        // own doc comment for what breaks without it.
+        testInstrumentationRunner = "com.aarogya.sanjeevani.patient.HiltTestRunner"
     }
 
     productFlavors {
@@ -120,5 +125,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.navigation.testing)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.android.compiler)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

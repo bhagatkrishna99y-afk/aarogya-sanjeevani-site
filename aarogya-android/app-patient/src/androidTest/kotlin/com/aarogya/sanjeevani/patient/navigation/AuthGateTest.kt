@@ -1,6 +1,5 @@
 package com.aarogya.sanjeevani.patient.navigation
 
-import androidx.activity.ComponentActivity
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -12,27 +11,39 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.aarogya.sanjeevani.core.data.auth.AuthState
 import com.aarogya.sanjeevani.core.designsystem.theme.AarogyaTheme
+import com.aarogya.sanjeevani.patient.HiltTestActivity
 import com.aarogya.sanjeevani.patient.PatientApp
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Exercises [AuthGateEffect] through the real [PatientApp] composable --
- * no Hilt, no real [com.aarogya.sanjeevani.core.data.auth.AuthRepository]:
+ * Exercises [AuthGateEffect] through the real [PatientApp] composable.
  * [PatientApp] takes [AuthState] as a plain parameter specifically so
- * this can drive it directly (see [PatientApp]'s own doc comment).
+ * this can drive it directly without faking
+ * [com.aarogya.sanjeevani.core.data.auth.AuthRepository] (see
+ * [PatientApp]'s own doc comment) -- but the authenticated routes it
+ * navigates into (Home and beyond) are real production screens that
+ * call `hiltViewModel()`, which still needs a real Hilt component, hence
+ * `@HiltAndroidTest`/[HiltTestActivity] rather than a plain
+ * `ComponentActivity`.
  *
  * Instrumented (connected device/emulator) rather than local/Robolectric
  * -- [androidx.compose.ui.test.junit4.createAndroidComposeRule] needs
  * one, matching the other Compose UI test dependencies this module
  * already declares.
  */
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class AuthGateTest {
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val composeTestRule = createAndroidComposeRule<HiltTestActivity>()
 
     private lateinit var navController: TestNavHostController
     private lateinit var authState: MutableState<AuthState>
