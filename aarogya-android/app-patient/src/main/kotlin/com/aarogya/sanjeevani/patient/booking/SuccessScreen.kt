@@ -18,6 +18,7 @@ import com.aarogya.sanjeevani.core.designsystem.component.AsButton
 import com.aarogya.sanjeevani.core.designsystem.component.AsButtonVariant
 import com.aarogya.sanjeevani.core.designsystem.component.AsCard
 import com.aarogya.sanjeevani.core.designsystem.component.AsRequestStatus
+import com.aarogya.sanjeevani.core.designsystem.component.AsSuccessCheck
 import com.aarogya.sanjeevani.core.designsystem.component.StatusChip
 import com.aarogya.sanjeevani.core.designsystem.theme.AsTheme
 
@@ -71,6 +72,7 @@ internal fun SuccessScreen(
             verticalArrangement = Arrangement.spacedBy(AsTheme.spacing.lg),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            AsSuccessCheck()
             Text(text = "Request sent", style = MaterialTheme.typography.headlineSmall)
             StatusChip(status = AsRequestStatus.Requested)
             AsCard {
