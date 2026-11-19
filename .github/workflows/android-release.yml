@@ -17,6 +17,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Fail fast, before Java/Gradle setup, if any secret this workflow
+      # needs isn't configured on the repo -- unset `${{ secrets.X }}`
+      # expressions silently resolve to an empty string, not an absent
+      # value, so without this check an unset secret doesn't fail cleanly
+      # here: loadSigningConfig() in AndroidApplicationConventionPlugin.kt
+      # treats all four SIGNING_* env vars as "present" the moment they're
+      # merely *set* (even to ""), and the build dies much later with an
+      # opaque keystore error instead of naming the actual problem. Checks
+      # existence only -- never echoes a value, per GitHub's own guidance
+      # on not exposing secrets in logs.
+      - name: Check required secrets
+        env:
+          PATIENT_KEYSTORE_BASE64: ${{ secrets.PATIENT_KEYSTORE_BASE64 }}
+          PATIENT_KEYSTORE_PASSWORD: ${{ secrets.PATIENT_KEYSTORE_PASSWORD }}
+          PATIENT_KEY_ALIAS: ${{ secrets.PATIENT_KEY_ALIAS }}
+          PATIENT_KEY_PASSWORD: ${{ secrets.PATIENT_KEY_PASSWORD }}
+          SUPABASE_URL_PROD: ${{ secrets.SUPABASE_URL_PROD }}
+          SUPABASE_ANON_KEY_PROD: ${{ secrets.SUPABASE_ANON_KEY_PROD }}
+          WEBSITE_BASE_URL_PROD: ${{ secrets.WEBSITE_BASE_URL_PROD }}
+          CONTACT_EMAIL_PROD: ${{ secrets.CONTACT_EMAIL_PROD }}
+        run: |
+          missing=()
+          for name in PATIENT_KEYSTORE_BASE64 PATIENT_KEYSTORE_PASSWORD PATIENT_KEY_ALIAS PATIENT_KEY_PASSWORD \
+                      SUPABASE_URL_PROD SUPABASE_ANON_KEY_PROD WEBSITE_BASE_URL_PROD CONTACT_EMAIL_PROD; do
+            if [ -z "${!name}" ]; then
+              missing+=("$name")
+            fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Missing required repo secret(s): ${missing[*]}. Set them with 'gh secret set <NAME>', then re-run this workflow."
+            exit 1
+          fi
+          echo "All required release secrets are present."
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
